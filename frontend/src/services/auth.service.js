@@ -23,10 +23,71 @@ const authService = {
   },
 
   /**
+   * Verify OTP
+   */
+  async verifyOtp(data) {
+    return await api.post('/auth/verify-otp', data);
+  },
+
+  /**
+   * Resend OTP
+   */
+  async resendOtp(data) {
+    return await api.post('/auth/resend-otp', data);
+  },
+
+  /**
+   * Forgot Password
+   */
+  async forgotPassword(data) {
+    return await api.post('/auth/forgot-password', data);
+  },
+
+  /**
+   * Verify Reset Password OTP
+   */
+  async verifyResetOtp(data) {
+    return await api.post('/auth/verify-reset-otp', data);
+  },
+
+  /**
+   * Reset Password
+   */
+  async resetPassword(data) {
+    return await api.post('/auth/reset-password', data);
+  },
+
+  /**
    * Get current authenticated user profile
    */
   async getMe() {
     return await api.get('/auth/me');
+  },
+
+  /**
+   * Remember current device (extends refresh token to 14 days)
+   */
+  async rememberDevice() {
+    return await api.post('/auth/remember-device');
+  },
+
+  /**
+   * Logout user and clear cookies
+   */
+  async logout() {
+    return await api.post('/auth/logout');
+  },
+
+  /**
+   * Update user profile and avatar
+   * @param {FormData} formData - form data containing fullName and avatar file
+   */
+  async updateProfile(formData) {
+    return await api.put('/auth/profile', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 };
 

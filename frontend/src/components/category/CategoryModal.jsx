@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Input from '../common/Input';
+import ConfirmModal from '../common/ConfirmModal';
 
 const TYPE_OPTIONS = [
   { value: 'expense', label: '💸 Chi tiêu' },
@@ -11,7 +12,9 @@ const TYPE_OPTIONS = [
 const COLOR_OPTIONS = [
   '#2563EB', '#16A34A', '#DC2626', '#F97316',
   '#8B5CF6', '#EC4899', '#06B6D4', '#D97706',
-  '#6B7280', '#10B981', '#EF4444', '#84CC16'
+  '#6B7280', '#10B981', '#EF4444', '#84CC16',
+  '#4F46E5', '#059669', '#E11D48', '#CA8A04',
+  '#0284C7', '#475569', '#9333EA', '#0D9488'
 ];
 
 const ICON_OPTIONS = [
@@ -27,16 +30,24 @@ const ICON_OPTIONS = [
   { name: 'Briefcase', label: '💼' },
   { name: 'GraduationCap', label: '🎓' },
   { name: 'Gift', label: '🎁' },
-  { name: 'MoreHorizontal', label: '⋯' },
   { name: 'Coffee', label: '☕' },
   { name: 'Car', label: '🚗' },
-  { name: 'Music', label: '🎵' }
+  { name: 'Music', label: '🎵' },
+  { name: 'Wifi', label: '📶' },
+  { name: 'Smartphone', label: '📱' },
+  { name: 'Zap', label: '⚡' },
+  { name: 'Droplets', label: '💧' },
+  { name: 'Plane', label: '✈️' },
+  { name: 'Dumbbell', label: '🏋️' },
+  { name: 'Scissors', label: '✂️' },
+  { name: 'Baby', label: '👶' },
+  { name: 'MoreHorizontal', label: '⋯' },
 ];
 
 /**
  * CategoryModal — used for both Create and Edit category operations.
  */
-export default function CategoryModal({ isOpen, onClose, onSubmit, initialData = null }) {
+export default function CategoryModal({ isOpen, onClose, onSubmit, initialData = null, existingCategories = [] }) {
   const isEditing = !!initialData;
 
   const [form, setForm] = useState({
@@ -47,10 +58,22 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Derived state for used colors and icons based on ALL categories (global uniqueness)
+  // User exception: 'MoreHorizontal' icon and '#6b7280' color are allowed to be duplicated (for 'Khác' category)
+  const otherCategories = existingCategories.filter(c => c.id !== initialData?.id);
+  const usedColors = otherCategories
+    .map(c => c.color.toLowerCase())
+    .filter(color => color !== '#6b7280');
+  const usedIcons = otherCategories
+    .map(c => c.icon)
+    .filter(icon => icon !== 'MoreHorizontal');
 
   useEffect(() => {
     if (isOpen) {
       setError('');
+      setShowConfirm(false);
       if (initialData) {
         setForm({
           name: initialData.name || '',
@@ -59,17 +82,68 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
           color: initialData.color || '#2563EB'
         });
       } else {
-        setForm({ name: '', type: 'expense', icon: 'Tag', color: '#2563EB' });
+        const usedC = existingCategories.map(c => c.color.toLowerCase()).filter(c => c !== '#6b7280');
+        const usedI = existingCategories.map(c => c.icon).filter(i => i !== 'MoreHorizontal');
+        const firstAvailColor = COLOR_OPTIONS.find(c => !usedC.includes(c.toLowerCase())) || COLOR_OPTIONS[0];
+        const firstAvailIcon = ICON_OPTIONS.find(i => !usedI.includes(i.name))?.name || ICON_OPTIONS[0].name;
+        setForm({ name: '', type: 'expense', icon: firstAvailIcon, color: firstAvailColor });
       }
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, existingCategories]);
+
+  const handleTypeChange = (newType) => {
+    // Uniqueness is global, so used colors/icons are the same regardless of type
+    let newColor = form.color;
+    if (usedColors.includes(newColor.toLowerCase())) {
+      newColor = COLOR_OPTIONS.find(c => !usedColors.includes(c.toLowerCase())) || COLOR_OPTIONS[0];
+    }
+    
+    let newIcon = form.icon;
+    if (usedIcons.includes(newIcon)) {
+      newIcon = ICON_OPTIONS.find(i => !usedIcons.includes(i.name))?.name || ICON_OPTIONS[0].name;
+    }
+    
+    setForm(p => ({ ...p, type: newType, color: newColor, icon: newIcon }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) {
+    const name = form.name.trim();
+    if (!name) {
       setError('Vui lòng nhập tên danh mục');
       return;
     }
+    if (name.length < 5) {
+      setError('Tên danh mục phải từ 5 ký tự trở lên');
+      return;
+    }
+    if (!/^[a-zA-ZÀ-ỹ0-9\s]+$/.test(name)) {
+      setError('Tên danh mục không được chứa ký tự đặc biệt');
+      return;
+    }
+    
+    // Check for duplicates
+    // Name duplicate is still per-type (Expense can have a name, Income can have same name, e.g. Khác)
+    const isNameDuplicate = existingCategories.some(c => c.type === form.type && c.name.toLowerCase() === name.toLowerCase() && c.id !== initialData?.id);
+    if (isNameDuplicate) {
+      setError('Tên danh mục này đã tồn tại trong cùng loại, vui lòng chọn tên khác');
+      return;
+    }
+    // Color and Icon are GLOBAL (across both), except #6b7280 and MoreHorizontal
+    if (usedColors.includes(form.color.toLowerCase()) && form.color.toLowerCase() !== '#6b7280') {
+      setError('Màu sắc này đã được sử dụng ở Thu nhập hoặc Chi tiêu, vui lòng chọn màu khác');
+      return;
+    }
+    if (usedIcons.includes(form.icon) && form.icon !== 'MoreHorizontal') {
+      setError('Icon này đã được sử dụng ở Thu nhập hoặc Chi tiêu, vui lòng chọn icon khác');
+      return;
+    }
+
+    setShowConfirm(true);
+  };
+
+  const executeSubmit = async () => {
+    setShowConfirm(false);
     setLoading(true);
     setError('');
     try {
@@ -83,13 +157,14 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
   };
 
   return (
+    <>
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
       subtitle={isEditing ? `Đang sửa: ${initialData?.name}` : 'Tạo danh mục chi tiêu hoặc thu nhập riêng'}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Name */}
         <Input
           id="cat-name"
@@ -110,7 +185,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setForm(p => ({ ...p, type: opt.value }))}
+                  onClick={() => handleTypeChange(opt.value)}
                   className={`py-2.5 px-3 rounded-xl text-sm font-medium border transition-all ${
                     form.type === opt.value
                       ? 'bg-primary text-white border-primary shadow-sm'
@@ -128,16 +203,20 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
         <div>
           <label className="block text-sm font-medium text-neutral-maintext mb-1.5">Màu sắc</label>
           <div className="flex flex-wrap gap-2">
-            {COLOR_OPTIONS.map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setForm(p => ({ ...p, color: c }))}
-                className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${form.color === c ? 'ring-2 ring-offset-2 ring-neutral-maintext scale-110' : ''}`}
-                style={{ backgroundColor: c }}
-                title={c}
-              />
-            ))}
+            {COLOR_OPTIONS.map(c => {
+              const isUsed = usedColors.includes(c.toLowerCase());
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  disabled={isUsed}
+                  onClick={() => setForm(p => ({ ...p, color: c }))}
+                  className={`w-8 h-8 rounded-full transition-transform ${isUsed ? 'opacity-20 cursor-not-allowed' : 'hover:scale-110'} ${form.color === c ? 'ring-2 ring-offset-2 ring-neutral-maintext scale-110' : ''}`}
+                  style={{ backgroundColor: c }}
+                  title={c}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -145,22 +224,26 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
         <div>
           <label className="block text-sm font-medium text-neutral-maintext mb-1.5">Icon đại diện</label>
           <div className="flex flex-wrap gap-1.5">
-            {ICON_OPTIONS.map(opt => (
-              <button
-                key={opt.name}
-                type="button"
-                onClick={() => setForm(p => ({ ...p, icon: opt.name }))}
-                className={`w-10 h-10 text-lg rounded-xl flex items-center justify-center transition-all hover:scale-110 ${
-                  form.icon === opt.name
-                    ? 'ring-2 ring-offset-1 bg-primary-light'
-                    : 'hover:bg-neutral-bg'
-                }`}
-                style={form.icon === opt.name ? { ringColor: form.color } : {}}
-                title={opt.name}
-              >
-                {opt.label}
-              </button>
-            ))}
+            {ICON_OPTIONS.map(opt => {
+              const isUsed = usedIcons.includes(opt.name);
+              return (
+                <button
+                  key={opt.name}
+                  type="button"
+                  disabled={isUsed}
+                  onClick={() => setForm(p => ({ ...p, icon: opt.name }))}
+                  className={`w-10 h-10 text-lg rounded-xl flex items-center justify-center transition-all ${isUsed ? 'opacity-20 cursor-not-allowed bg-neutral-bg' : 'hover:scale-110'} ${
+                    form.icon === opt.name
+                      ? 'ring-2 ring-offset-1 bg-primary-light'
+                      : 'hover:bg-neutral-bg'
+                  }`}
+                  style={form.icon === opt.name ? { ringColor: form.color } : {}}
+                  title={opt.name}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -186,5 +269,14 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
         </div>
       </form>
     </Modal>
+    <ConfirmModal
+      isOpen={showConfirm}
+      onClose={() => setShowConfirm(false)}
+      onConfirm={executeSubmit}
+      title={isEditing ? 'Lưu thay đổi' : 'Thêm danh mục mới'}
+      message={isEditing ? 'Bạn có chắc muốn lưu các thay đổi này không?' : 'Bạn có chắc muốn thêm danh mục này không?'}
+      confirmLabel="Đồng ý"
+    />
+    </>
   );
 }

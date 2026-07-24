@@ -3,19 +3,22 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import Navbar from '../components/common/Navbar';
 import ConfirmModal from '../components/common/ConfirmModal';
-import TransactionSummary from '../components/transaction/TransactionSummary';
+import QuickAddChips from '../components/transaction/QuickAddChips';
+import StreakBadge from '../components/transaction/StreakBadge';
 import TransactionFilter from '../components/transaction/TransactionFilter';
 import TransactionItem from '../components/transaction/TransactionItem';
 import TransactionCalendar from '../components/transaction/TransactionCalendar';
 import TransactionModal from '../components/transaction/TransactionModal';
 import DailyDetailsModal from '../components/transaction/DailyDetailsModal';
 import ReceiptUploadModal from '../components/transaction/ReceiptUploadModal';
+import { useStreak } from '../hooks/useStreak';
 import {
   Plus, ArrowLeftRight, RefreshCw, AlertCircle, Calendar, List, Camera, Sparkles
 } from 'lucide-react';
 
-export default function TransactionsPage() {
+export default function TransactionsPage({ onNavigateToPage }) {
   const {
     transactions,
     summary,
@@ -33,6 +36,7 @@ export default function TransactionsPage() {
   } = useTransactions();
 
   const { categories, loading: catLoading } = useCategories();
+  const { streakData, loading: streakLoading, refetchStreak } = useStreak();
 
   // Modals state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -44,14 +48,17 @@ export default function TransactionsPage() {
   // Daily modal when clicked on calendar day
   const [selectedDayInfo, setSelectedDayInfo] = useState(null);
   const [prefilledDate, setPrefilledDate] = useState(null);
+  const [prefillData, setPrefillData] = useState(null);
 
   const handleCreate = async (formData) => {
     await createTransaction(formData);
     setPrefilledDate(null);
+    refetchStreak();
   };
 
   const handleEdit = async (formData) => {
     await updateTransaction(editingTransaction.id, formData);
+    refetchStreak();
   };
 
   const handleDelete = async () => {
@@ -59,6 +66,7 @@ export default function TransactionsPage() {
     try {
       await removeTransaction(deletingTransaction.id);
       setDeletingTransaction(null);
+      refetchStreak();
     } finally {
       setDeleteLoading(false);
     }
@@ -72,78 +80,95 @@ export default function TransactionsPage() {
   const loading = txLoading || catLoading;
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-            <ArrowLeftRight className="w-5 h-5 text-primary" />
-            Sổ Thu Chi
-          </h2>
-          <p className="text-sm text-neutral-subtext mt-0.5">
-            Nhật ký theo dõi các khoản chi tiêu và thu nhập hàng ngày
-          </p>
-        </div>
+    <>
+      <Navbar activePage="transactions" onNavigateToPage={onNavigateToPage} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
+                <ArrowLeftRight className="w-5 h-5 text-primary" />
+                Sổ Thu Chi
+              </h2>
+              <p className="text-sm text-neutral-subtext mt-0.5">
+                Nhật ký theo dõi các khoản chi tiêu và thu nhập hàng ngày
+              </p>
+            </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="outline"
-            size="md"
-            icon={Sparkles}
-            onClick={() => setShowReceiptModal(true)}
-            className="border-primary/40 text-primary hover:bg-primary/10 shadow-sm"
-          >
-            📷 Quét hóa đơn AI
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            onClick={() => {
-              setPrefilledDate(new Date().toISOString().slice(0, 10));
-              setShowCreateModal(true);
-            }}
-          >
-            Thêm khoản thu/chi
-          </Button>
-        </div>
-      </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                size="md"
+                icon={Sparkles}
+                onClick={() => setShowReceiptModal(true)}
+                className="border-primary/40 text-primary hover:bg-primary/10 shadow-sm"
+              >
+                Quét hóa đơn AI
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                icon={Plus}
+                onClick={() => {
+                  setPrefilledDate(new Date().toISOString().slice(0, 10));
+                  setShowCreateModal(true);
+                }}
+              >
+                Thêm giao dịch
+              </Button>
+            </div>
+          </div>
 
-      {/* Monthly Summary Cards */}
-      <TransactionSummary summary={summary} loading={loading} />
+          {/* Quick-add section */}
+          <div className="bg-white p-3 rounded-2xl border border-neutral-border shadow-sm">
+            <QuickAddChips 
+              refreshTrigger={transactions}
+              onSelectTemplate={(tpl) => {
+                setPrefillData({
+                  category_id: tpl.categoryId,
+                  amount: '',
+                  note: '',
+                  type: 'expense'
+                });
+                setPrefilledDate(new Date().toISOString().slice(0, 10));
+                setShowCreateModal(true);
+              }} 
+            />
+          </div>
 
-      {/* Filter & View Mode Switcher */}
-      <TransactionFilter
-        filters={filters}
-        setFilters={setFilters}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        categories={categories}
-      />
+          {/* Combined Filter & Content Container */}
+          <div className="bg-white rounded-2xl border border-neutral-border shadow-sm overflow-hidden">
+            {/* Filter & View Mode Switcher */}
+            <TransactionFilter
+              filters={filters}
+              setFilters={setFilters}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              categories={categories}
+              streakData={streakData}
+              streakLoading={streakLoading}
+            />
 
       {/* States: Loading / Error / Empty / Data */}
       {loading && (
-        <Card>
-          <div className="flex items-center justify-center py-16 gap-3 text-neutral-subtext">
-            <RefreshCw className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-sm font-medium">Đang tải dữ liệu thu chi...</span>
-          </div>
-        </Card>
+        <div className="flex items-center justify-center py-16 gap-3 text-neutral-subtext">
+          <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+          <span className="text-sm font-medium">Đang tải dữ liệu thu chi...</span>
+        </div>
       )}
 
       {!loading && txError && (
-        <Card>
-          <div className="flex items-center gap-3 py-8 text-danger">
-            <AlertCircle className="w-6 h-6 shrink-0" />
-            <div>
-              <p className="text-sm font-bold">Không tải được nhật ký thu chi</p>
-              <p className="text-xs text-neutral-subtext mt-0.5">{txError}</p>
-            </div>
-            <Button variant="ghost" size="sm" icon={RefreshCw} onClick={refetch} className="ml-auto">
-              Thử lại
-            </Button>
+        <div className="flex items-center gap-3 py-8 px-6 text-danger">
+          <AlertCircle className="w-6 h-6 shrink-0" />
+          <div>
+            <p className="text-sm font-bold">Không tải được nhật ký thu chi</p>
+            <p className="text-xs text-neutral-subtext mt-0.5">{txError}</p>
           </div>
-        </Card>
+          <Button variant="ghost" size="sm" icon={RefreshCw} onClick={refetch} className="ml-auto">
+            Thử lại
+          </Button>
+        </div>
       )}
 
       {!loading && !txError && (
@@ -159,10 +184,12 @@ export default function TransactionsPage() {
 
           {/* List View */}
           {viewMode === 'list' && (
-            <Card
-              title="Nhật ký thu chi"
-              subtitle={`Hiển thị ${transactions.length} khoản thu/chi trong tháng`}
-            >
+            <div className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-neutral-maintext">Nhật ký thu chi</h3>
+                <p className="text-sm text-neutral-subtext">Hiển thị {transactions.length} khoản thu/chi trong tháng</p>
+              </div>
+              
               {transactions.length === 0 ? (
                 <div className="text-center py-14">
                   <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center mx-auto mb-3">
@@ -181,11 +208,11 @@ export default function TransactionsPage() {
                       setShowCreateModal(true);
                     }}
                   >
-                    Thêm khoản thu/chi
+                    Thêm giao dịch
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2.5 -mx-2">
+                <div className="space-y-2.5">
                   {transactions.map(tx => (
                     <TransactionItem
                       key={tx.id}
@@ -196,21 +223,24 @@ export default function TransactionsPage() {
                   ))}
                 </div>
               )}
-            </Card>
+            </div>
           )}
         </>
       )}
+      </div>
 
       {/* Create / Edit Modal */}
       <TransactionModal
         isOpen={showCreateModal || !!editingTransaction}
+        isEdit={!!editingTransaction}
         onClose={() => {
           setShowCreateModal(false);
           setEditingTransaction(null);
           setPrefilledDate(null);
+          setPrefillData(null);
         }}
         onSubmit={showCreateModal ? handleCreate : handleEdit}
-        initialData={editingTransaction}
+        initialData={editingTransaction || prefillData}
         initialDate={prefilledDate}
         categories={categories}
       />
@@ -243,6 +273,8 @@ export default function TransactionsPage() {
         message={`Bạn có chắc muốn xóa giao dịch "${deletingTransaction?.category_name} (${Number(deletingTransaction?.amount || 0).toLocaleString('vi-VN')} đ)" không? Hành động này không thể khôi phục.`}
         confirmLabel="Xóa giao dịch"
       />
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

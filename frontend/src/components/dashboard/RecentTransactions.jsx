@@ -2,13 +2,7 @@ import React from 'react';
 import { ArrowLeftRight, Plus, ChevronRight, Calendar, MapPin, FileText } from 'lucide-react';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/formatCurrency';
-
-const ICON_EMOJI = {
-  Tag: '🏷️', UtensilsCrossed: '🍽️', Home: '🏠', BookOpen: '📚',
-  Bus: '🚌', Gamepad2: '🎮', ShoppingBag: '🛍️', Heart: '💊',
-  Users: '👨‍👩‍👧', Briefcase: '💼', GraduationCap: '🎓', Gift: '🎁',
-  MoreHorizontal: '⋯', Coffee: '☕', Car: '🚗', Music: '🎵'
-};
+import { getCategoryEmoji } from '../../utils/emoji';
 
 export default function RecentTransactions({ transactions = [], onNavigateToAll, onAddTransaction }) {
   const hasData = transactions.length > 0;
@@ -50,14 +44,14 @@ export default function RecentTransactions({ transactions = [], onNavigateToAll,
               icon={Plus}
               onClick={onAddTransaction}
             >
-              Thêm khoản thu/chi
+              Thêm giao dịch
             </Button>
           </div>
         ) : (
           <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
             {transactions.map(tx => {
               const isIncome = tx.type === 'income';
-              const emoji = ICON_EMOJI[tx.category_icon] || '🏷️';
+              const emoji = getCategoryEmoji(tx.category_icon);
               const dateStr = tx.transaction_date_str || tx.transaction_date?.slice(0, 10);
               const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '';
 

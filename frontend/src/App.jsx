@@ -7,6 +7,7 @@ import CategoriesPage from './pages/CategoriesPage';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
 import BudgetPage from './pages/BudgetPage';
+import SavingsJarsPage from './pages/SavingsJarsPage';
 import Button from './components/common/Button';
 import { useChatAdvisor } from './hooks/useChatAdvisor';
 import ChatBubbleButton from './components/chat/ChatBubbleButton';
@@ -47,9 +48,10 @@ function MainAppContent() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard': return <DashboardPage onNavigateToPage={setActivePage} />;
-      case 'transactions': return <TransactionsPage />;
-      case 'categories': return <CategoriesPage />;
-      case 'budget': return <BudgetPage />;
+      case 'transactions': return <TransactionsPage onNavigateToPage={setActivePage} />;
+      case 'categories': return <CategoriesPage onNavigateToPage={setActivePage} />;
+      case 'budget': return <BudgetPage onNavigateToPage={setActivePage} />;
+      case 'savings': return <SavingsJarsPage onNavigateToPage={setActivePage} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center py-24 text-neutral-subtext">
@@ -65,93 +67,7 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-neutral-bg font-sans">
-      {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-neutral-border sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary rounded-xl text-white shadow-sm shadow-primary/30">
-                <Wallet className="w-5 h-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-bold text-neutral-maintext leading-tight">Tài Chính Sinh Viên</p>
-                <p className="text-xs text-neutral-subtext leading-tight">Student Financial Manager</p>
-              </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              {NAV_ITEMS.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => !item.disabled && setActivePage(item.id)}
-                  disabled={item.disabled}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activePage === item.id
-                      ? 'bg-primary-light text-primary'
-                      : item.disabled
-                        ? 'text-neutral-border cursor-not-allowed'
-                        : 'text-neutral-subtext hover:bg-neutral-bg hover:text-neutral-maintext'
-                    }`}
-                  title={item.disabled ? 'Sắp ra mắt...' : item.label}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            {/* User Info + Logout */}
-            <div className="flex items-center gap-2">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-semibold text-neutral-maintext flex items-center gap-1 justify-end">
-                  <UserCheck className="w-3.5 h-3.5 text-primary" />
-                  {user?.fullName}
-                </p>
-                <p className="text-xs text-neutral-subtext">{user?.email}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={logout}
-                icon={LogOut}
-                className="text-danger hover:bg-danger-light hover:text-danger"
-              >
-                <span className="hidden sm:inline">Đăng xuất</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Page Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {renderPage()}
-      </main>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-border z-40">
-        <div className="flex items-center justify-around">
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => !item.disabled && setActivePage(item.id)}
-              disabled={item.disabled}
-              className={`flex flex-col items-center gap-0.5 py-3 px-4 text-xs font-medium transition-colors ${activePage === item.id
-                  ? 'text-primary'
-                  : item.disabled
-                    ? 'text-neutral-border'
-                    : 'text-neutral-subtext'
-                }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
-      {/* Bottom padding for mobile nav */}
-      <div className="md:hidden h-16" />
+      {renderPage()}
 
       {/* Global Floating AI Chat Widget */}
       <ChatBubbleButton
@@ -166,6 +82,9 @@ function MainAppContent() {
         sending={chatAdvisor.sending}
         onSendMessage={chatAdvisor.sendMessage}
         onClearHistory={chatAdvisor.clearHistory}
+        onConfirmAction={chatAdvisor.confirmAction}
+        onConfirmBudget={chatAdvisor.confirmBudget}
+        onCancelAction={chatAdvisor.cancelAction}
       />
     </div>
   );

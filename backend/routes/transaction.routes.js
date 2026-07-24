@@ -16,7 +16,12 @@ const transactionRules = [
   check('amount')
     .notEmpty().withMessage('Số tiền không được để trống')
     .isNumeric().withMessage('Số tiền phải là dạng số')
-    .custom(val => Number(val) > 0).withMessage('Số tiền phải lớn hơn 0'),
+    .custom(val => {
+      const num = Number(val);
+      if (num < 1000) throw new Error('Số tiền tối thiểu là 1.000đ');
+      if (num > 100000000000) throw new Error('Số tiền tối đa là 100.000.000.000đ (100 tỷ)');
+      return true;
+    }),
   check('categoryId')
     .notEmpty().withMessage('Vui lòng chọn danh mục')
     .isNumeric().withMessage('ID danh mục không hợp lệ'),
@@ -34,6 +39,12 @@ router.get('/', transactionController.getAllTransactions);
 
 // GET /api/transactions/summary
 router.get('/summary', transactionController.getSummary);
+
+// GET /api/transactions/quick-templates
+router.get('/quick-templates', transactionController.getQuickTemplates);
+
+// GET /api/transactions/streak
+router.get('/streak', transactionController.getStreak);
 
 // POST /api/transactions/from-receipt
 router.post('/from-receipt', transactionController.createTransactionFromReceipt);

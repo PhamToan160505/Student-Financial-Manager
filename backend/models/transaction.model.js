@@ -120,11 +120,48 @@ async function getSummary({ userId, month }) {
 }
 
 /**
+ * Get total sum of transactions by type ('income' or 'expense') for a specific month
+ */
+async function sumByType({ userId, month, type }) {
+  let query = `
+    SELECT COALESCE(SUM(amount), 0) AS total
+    FROM transactions
+    WHERE user_id = ? AND type = ?
+  `;
+  const params = [userId, type];
+
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    query += ` AND DATE_FORMAT(transaction_date, '%Y-%m') = ?`;
+    params.push(month);
+  }
+
+  const [rows] = await pool.query(query, params);
+  return Number(rows[0]?.total || 0);
+}
+
+/**
  * Check ownership by id and userId before update/delete (IDOR prevention)
  */
 async function findByIdAndUserId(id, userId) {
   const [rows] = await pool.query(
     'SELECT * FROM transactions WHERE id = ? AND user_id = ?',
+    [id, userId]
+  );
+  return rows[0] || null;
+}
+
+/**
+ * Fetch a single transaction with joined category info by id+userId.
+ * Used after create/update to return the full record without loading all transactions.
+ */
+async function findById(id, userId) {
+  const [rows] = await pool.query(
+    `SELECT t.*, 
+       DATE_FORMAT(t.transaction_date, '%Y-%m-%d') as transaction_date_str,
+       c.name as category_name, c.icon as category_icon, c.color as category_color
+     FROM transactions t
+     LEFT JOIN categories c ON t.category_id = c.id
+     WHERE t.id = ? AND t.user_id = ?`,
     [id, userId]
   );
   return rows[0] || null;
@@ -174,13 +211,91 @@ async function countByReceiptId(receiptId) {
   return rows[0] ? rows[0].cnt : 0;
 }
 
+/**
+ * Lấy các giao dịch chi tiêu trong X tháng gần đây để tính Quick-add templates bằng JS
+ */
+async function getRawTransactionsForQuickAdd(userId, monthsBack = 3) {
+  const query = `
+    SELECT 
+      t.category_id,
+      t.amount,
+      t.note,
+      c.name as category_name,
+      c.icon as category_icon,
+      c.color as category_color
+    FROM transactions t
+    JOIN categories c ON t.category_id = c.id
+    WHERE t.user_id = ? 
+      AND t.type = 'expense'
+      AND t.transaction_date >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
+  `;
+  const [rows] = await pool.query(query, [userId, monthsBack]);
+  return rows;
+}
+
+/**
+ * Lấy tổng chi tiêu theo từng danh mục trong 1 tháng
+ */
+async function getCategoryTotalsForQuickAdd(userId, month) {
+  const query = `
+    SELECT 
+      t.category_id,
+      SUM(t.amount) as total_amount,
+      COUNT(t.id) as frequency,
+      c.name as category_name,
+      c.icon as category_icon,
+      c.color as category_color
+    FROM transactions t
+    JOIN categories c ON t.category_id = c.id
+    WHERE t.user_id = ? 
+      AND t.type = 'expense'
+      AND DATE_FORMAT(t.transaction_date, '%Y-%m') = ?
+    GROUP BY t.category_id, c.name, c.icon, c.color
+    ORDER BY frequency DESC
+    LIMIT 5
+  `;
+  const [rows] = await pool.query(query, [userId, month]);
+  return rows;
+}
+
+/**
+ * Lấy danh sách các ngày có giao dịch, định dạng 'YYYY-MM-DD', sắp xếp giảm dần.
+ * Dùng để tính Streak.
+ */
+async function getDistinctTransactionDates(userId) {
+  const query = `
+    SELECT DISTINCT DATE_FORMAT(transaction_date, '%Y-%m-%d') as date_str
+    FROM transactions
+    WHERE user_id = ?
+    ORDER BY date_str DESC
+  `;
+  const [rows] = await pool.query(query, [userId]);
+  return rows.map(r => r.date_str);
+}
+
+/**
+ * Check if a category has any transactions
+ * Used to enforce strict audit trail integrity when user tries to delete a custom category
+ */
+async function checkCategoryHasTransactions(categoryId) {
+  const query = `SELECT id FROM transactions WHERE category_id = ? LIMIT 1`;
+  const [rows] = await pool.query(query, [categoryId]);
+  return rows.length > 0;
+}
+
 module.exports = {
   initTable,
   findMany,
   getSummary,
+  sumByType,
   findByIdAndUserId,
+  findById,
   create,
   update,
   remove,
-  countByReceiptId
+  countByReceiptId,
+  getRawTransactionsForQuickAdd,
+  getCategoryTotalsForQuickAdd,
+  getDistinctTransactionDates,
+  checkCategoryHasTransactions
 };

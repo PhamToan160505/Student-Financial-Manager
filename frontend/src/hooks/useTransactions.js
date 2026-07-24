@@ -50,6 +50,11 @@ export function useTransactions() {
 
   useEffect(() => {
     fetchTransactions();
+    
+    // Auto-refresh when AI Chat creates budget/transaction
+    const handleUpdate = () => fetchTransactions();
+    window.addEventListener('financial-data-updated', handleUpdate);
+    return () => window.removeEventListener('financial-data-updated', handleUpdate);
   }, [fetchTransactions]);
 
   // Group transactions by date for Calendar and Day view

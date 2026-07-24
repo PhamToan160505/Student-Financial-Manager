@@ -38,32 +38,44 @@ export function useCategories() {
   }, [fetchCategories]);
 
   const createCategory = async (data) => {
-    const res = await categoryService.create(data);
-    if (res.success) {
-      toast.success(res.message || 'Tạo danh mục thành công!');
-      await fetchCategories();
-      return res.data.category;
+    try {
+      const res = await categoryService.create(data);
+      if (res.success) {
+        toast.success(res.message || 'Tạo danh mục thành công!');
+        await fetchCategories();
+        return res.data.category;
+      }
+      throw new Error(res.message);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     }
-    throw new Error(res.message);
   };
 
   const updateCategory = async (id, data) => {
-    const res = await categoryService.update(id, data);
-    if (res.success) {
-      toast.success(res.message || 'Cập nhật danh mục thành công!');
-      await fetchCategories();
-    } else {
-      throw new Error(res.message);
+    try {
+      const res = await categoryService.update(id, data);
+      if (res.success) {
+        toast.success(res.message || 'Cập nhật danh mục thành công!');
+        await fetchCategories();
+      } else {
+        throw new Error(res.message);
+      }
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     }
   };
 
   const removeCategory = async (id) => {
-    const res = await categoryService.remove(id);
-    if (res.success) {
-      toast.success(res.message || 'Xóa danh mục thành công!');
-      await fetchCategories();
-    } else {
-      throw new Error(res.message);
+    try {
+      const res = await categoryService.remove(id);
+      if (res.success) {
+        toast.success(res.message || 'Xóa danh mục thành công!');
+        await fetchCategories();
+      } else {
+        throw new Error(res.message);
+      }
+    } catch (err) {
+      throw new Error(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     }
   };
 

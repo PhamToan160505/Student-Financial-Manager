@@ -53,10 +53,37 @@ function getDaysInMonthVN(monthStr) {
   return new Date(year, month, 0).getDate();
 }
 
+/**
+ * Get yesterday's date string in YYYY-MM-DD format according to Vietnam timezone
+ */
+function getYesterdayVN() {
+  // To get yesterday in VN time, we first need current time, then subtract 24h
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: VN_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(d);
+}
+
+/**
+ * Subtract one day from a YYYY-MM-DD string
+ */
+function subtractOneDayVN(dateStr) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
 module.exports = {
   VN_TIMEZONE,
   getCurrentDateVN,
   getCurrentMonthVN,
   getCurrentDayVN,
-  getDaysInMonthVN
+  getDaysInMonthVN,
+  getYesterdayVN,
+  subtractOneDayVN
 };

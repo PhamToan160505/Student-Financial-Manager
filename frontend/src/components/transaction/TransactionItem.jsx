@@ -1,17 +1,11 @@
 import React from 'react';
 import { Pencil, Trash2, MapPin, Calendar, FileText } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
-
-const ICON_EMOJI = {
-  Tag: '🏷️', UtensilsCrossed: '🍽️', Home: '🏠', BookOpen: '📚',
-  Bus: '🚌', Gamepad2: '🎮', ShoppingBag: '🛍️', Heart: '💊',
-  Users: '👨‍👩‍👧', Briefcase: '💼', GraduationCap: '🎓', Gift: '🎁',
-  MoreHorizontal: '⋯', Coffee: '☕', Car: '🚗', Music: '🎵'
-};
+import { getCategoryEmoji } from '../../utils/emoji';
 
 export default function TransactionItem({ transaction, onEdit, onDelete }) {
   const isIncome = transaction.type === 'income';
-  const emoji = ICON_EMOJI[transaction.category_icon] || '🏷️';
+  const emoji = getCategoryEmoji(transaction.category_icon);
   const dateStr = transaction.transaction_date_str || transaction.transaction_date?.slice(0, 10);
 
   // Format date DD/MM/YYYY

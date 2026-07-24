@@ -3,22 +3,18 @@ import { useCategories } from '../hooks/useCategories';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
+import Navbar from '../components/common/Navbar';
 import ConfirmModal from '../components/common/ConfirmModal';
 import CategoryModal from '../components/category/CategoryModal';
+import toast from 'react-hot-toast';
 import {
   Plus, Pencil, Trash2, Tag, RefreshCw,
   AlertCircle, ShieldCheck, TrendingDown, TrendingUp
 } from 'lucide-react';
-
-const ICON_EMOJI = {
-  Tag: '🏷️', UtensilsCrossed: '🍽️', Home: '🏠', BookOpen: '📚',
-  Bus: '🚌', Gamepad2: '🎮', ShoppingBag: '🛍️', Heart: '💊',
-  Users: '👨‍👩‍👧', Briefcase: '💼', GraduationCap: '🎓', Gift: '🎁',
-  MoreHorizontal: '⋯', Coffee: '☕', Car: '🚗', Music: '🎵'
-};
+import { getCategoryEmoji } from '../utils/emoji';
 
 function CategoryItem({ category, onEdit, onDelete }) {
-  const emoji = ICON_EMOJI[category.icon] || '🏷️';
+  const emoji = getCategoryEmoji(category.icon);
 
   return (
     <div className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-bg/60 transition-colors group">
@@ -36,27 +32,14 @@ function CategoryItem({ category, onEdit, onDelete }) {
               <Badge label="Mặc định" variant="primary" size="sm" />
             ) : null}
           </div>
-          <span className="text-xs" style={{ color: category.color }}>{category.color}</span>
         </div>
       </div>
 
       {/* Actions only for user-created (non-default) categories */}
       {!Boolean(category.is_default) ? (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => onEdit(category)}
-            className="p-1.5 rounded-lg text-neutral-subtext hover:text-primary hover:bg-primary-light transition-colors"
-            title="Chỉnh sửa"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(category)}
-            className="p-1.5 rounded-lg text-neutral-subtext hover:text-danger hover:bg-danger-light transition-colors"
-            title="Xóa"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <Button variant="ghost" size="sm" icon={Pencil} onClick={() => onEdit(category)} title="Sửa" />
+          <Button variant="ghost" size="sm" icon={Trash2} onClick={() => onDelete(category)} title="Xóa" className="text-danger hover:bg-danger-light hover:text-danger" />
         </div>
       ) : (
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -67,7 +50,7 @@ function CategoryItem({ category, onEdit, onDelete }) {
   );
 }
 
-export default function CategoriesPage() {
+export default function CategoriesPage({ onNavigateToPage }) {
   const { expense, income, loading, error, refetch, createCategory, updateCategory, removeCategory } = useCategories();
 
   const [activeTab, setActiveTab] = useState('expense');
@@ -90,38 +73,53 @@ export default function CategoriesPage() {
       await removeCategory(deletingCategory.id);
       setDeletingCategory(null);
     } catch (err) {
-      // error already toasted in hook
+      toast.error(err.message || 'Xóa danh mục thất bại');
     } finally {
       setDeleteLoading(false);
     }
   };
 
   const currentList = activeTab === 'expense' ? expense : income;
-  const userCategories = currentList.filter(c => !c.is_default);
-  const defaultCategories = currentList.filter(c => c.is_default);
+  const userCategories = currentList.filter(c => !c.is_default).sort((a, b) => {
+    const aIsOther = a.name.toLowerCase().includes('khác');
+    const bIsOther = b.name.toLowerCase().includes('khác');
+    if (aIsOther && !bIsOther) return 1;
+    if (!aIsOther && bIsOther) return -1;
+    return 0;
+  });
+  const defaultCategories = currentList.filter(c => c.is_default).sort((a, b) => {
+    const aIsOther = a.name.toLowerCase().includes('khác');
+    const bIsOther = b.name.toLowerCase().includes('khác');
+    if (aIsOther && !bIsOther) return 1;
+    if (!aIsOther && bIsOther) return -1;
+    return 0;
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-            <Tag className="w-5 h-5 text-primary" />
-            Quản lý Danh mục
-          </h2>
-          <p className="text-sm text-neutral-subtext mt-0.5">
-            Phân loại thu nhập & chi tiêu của bạn
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={Plus}
-          onClick={() => setShowCreateModal(true)}
-        >
-          Thêm danh mục
-        </Button>
-      </div>
+    <>
+      <Navbar activePage="categories" onNavigateToPage={onNavigateToPage} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
+                <Tag className="w-5 h-5 text-primary" />
+                Quản lý Danh mục
+              </h2>
+              <p className="text-sm text-neutral-subtext mt-0.5">
+                Phân loại thu nhập & chi tiêu của bạn
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="md"
+              icon={Plus}
+              onClick={() => setShowCreateModal(true)}
+            >
+              Thêm danh mục
+            </Button>
+          </div>
 
       {/* Tab Switcher */}
       <div className="bg-neutral-bg/80 p-1.5 rounded-xl border border-neutral-border inline-flex">
@@ -178,12 +176,6 @@ export default function CategoriesPage() {
           <Card
             title="Danh mục hệ thống"
             subtitle={`${defaultCategories.length} danh mục mặc định`}
-            headerAction={
-              <div className="flex items-center gap-1 text-xs text-neutral-subtext bg-neutral-bg border border-neutral-border px-2 py-1 rounded-full">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                <span>Chỉ đọc</span>
-              </div>
-            }
           >
             {defaultCategories.length === 0 ? (
               <p className="text-sm text-neutral-subtext text-center py-6">Không có danh mục mặc định</p>
@@ -233,6 +225,7 @@ export default function CategoriesPage() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreate}
+        existingCategories={[...expense, ...income]}
       />
 
       <CategoryModal
@@ -240,6 +233,7 @@ export default function CategoriesPage() {
         onClose={() => setEditingCategory(null)}
         onSubmit={handleEdit}
         initialData={editingCategory}
+        existingCategories={[...expense, ...income]}
       />
 
       <ConfirmModal
@@ -251,6 +245,8 @@ export default function CategoriesPage() {
         message={`Bạn có chắc muốn xóa danh mục "${deletingCategory?.name}" không? Hành động này không thể hoàn tác.`}
         confirmLabel="Xóa danh mục"
       />
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

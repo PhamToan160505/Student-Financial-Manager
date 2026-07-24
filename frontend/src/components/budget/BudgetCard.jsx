@@ -1,23 +1,7 @@
 import React from 'react';
 import { Plus, Edit2, Trash2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
-
-const ICON_EMOJI = {
-  Tag: '🏷️', UtensilsCrossed: '🍽️', Home: '🏠', BookOpen: '📚',
-  Bus: '🚌', Gamepad2: '🎮', ShoppingBag: '🛍️', Heart: '💊',
-  Users: '👨‍👩‍👧', Briefcase: '💼', GraduationCap: '🎓', Gift: '🎁',
-  MoreHorizontal: '⋯', Coffee: '☕', Car: '🚗', Music: '🎵'
-};
-
-function getCategoryEmoji(iconStr) {
-  if (!iconStr) return '🏷️';
-  if (ICON_EMOJI[iconStr]) return ICON_EMOJI[iconStr];
-  if (iconStr.length <= 4 && !/^[a-zA-Z0-9]+$/.test(iconStr)) {
-    if (iconStr === 'Ă' || iconStr === '?' || iconStr === '') return '🏷️';
-    return iconStr;
-  }
-  return '🏷️';
-}
+import { getCategoryEmoji } from '../../utils/emoji';
 
 /**
  * BudgetCard - Displays budget limit, spent amount, capped progress bar, and intelligent alerts
@@ -115,9 +99,14 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
               <Edit2 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onDelete(item)}
-              title="Xóa hạn mức"
-              className="p-1.5 rounded-lg text-neutral-subtext hover:text-danger hover:bg-danger-light transition-all cursor-pointer"
+              onClick={() => item.spent === 0 ? onDelete(item) : undefined}
+              disabled={item.spent > 0}
+              title={item.spent > 0 ? "Không thể xóa vì đã có chi tiêu trong tháng" : "Xóa hạn mức"}
+              className={`p-1.5 rounded-lg transition-all ${
+                item.spent > 0 
+                  ? 'text-neutral-300 cursor-not-allowed'
+                  : 'text-neutral-subtext hover:text-danger hover:bg-danger-light cursor-pointer'
+              }`}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -128,7 +117,7 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
         <div className="flex items-baseline justify-between text-sm mt-3 mb-1.5">
           <div>
             <span className="text-neutral-subtext text-xs">Đã chi: </span>
-            <span className={`font-bold ${isOver ? 'text-danger' : isWarning ? 'text-warning' : 'text-neutral-maintext'}`}>
+            <span className={`font-bold ${isOver ? 'text-danger' : isWarning ? 'text-warning-dark' : 'text-neutral-maintext'}`}>
               {formatCurrency(spent)}
             </span>
           </div>
@@ -139,7 +128,7 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
                 Vượt {percent_used - 100}% ({formatCurrency(Math.abs(remaining))})
               </span>
             ) : isWarning ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-warning-light text-warning">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-warning-light text-warning-dark">
                 {percent_used}% (Còn {formatCurrency(remaining)})
               </span>
             ) : (
@@ -162,7 +151,7 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
       {/* Footer message if applicable */}
       <div className="mt-3 pt-2.5 border-t border-neutral-border/60 flex items-center justify-between text-xs text-neutral-subtext">
         <span>Tình trạng:</span>
-        <span className={`font-semibold ${isOver ? 'text-danger' : isWarning ? 'text-warning' : 'text-success'}`}>
+        <span className={`font-semibold ${isOver ? 'text-danger' : isWarning ? 'text-warning-dark' : 'text-success'}`}>
           {isOver ? 'Đã vượt quá hạn mức' : isWarning ? 'Sắp chạm ngưỡng hạn mức' : 'An toàn'}
         </span>
       </div>

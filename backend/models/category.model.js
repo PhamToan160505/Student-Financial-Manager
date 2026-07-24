@@ -44,13 +44,13 @@ async function seedDefaultCategories() {
     { name: 'Giải trí', type: 'expense', icon: 'Gamepad2', color: '#EC4899' },
     { name: 'Mua sắm', type: 'expense', icon: 'ShoppingBag', color: '#EF4444' },
     { name: 'Y tế / Sức khoẻ', type: 'expense', icon: 'Heart', color: '#10B981' },
-    { name: 'Khác (Chi)', type: 'expense', icon: 'MoreHorizontal', color: '#6B7280' },
+    { name: 'Khác (Chi Tiêu)', type: 'expense', icon: 'MoreHorizontal', color: '#6B7280' },
     // Income categories
     { name: 'Chu cấp gia đình', type: 'income', icon: 'Users', color: '#16A34A' },
     { name: 'Lương làm thêm / Freelance', type: 'income', icon: 'Briefcase', color: '#2563EB' },
     { name: 'Học bổng', type: 'income', icon: 'GraduationCap', color: '#D97706' },
     { name: 'Thưởng / Quà tặng', type: 'income', icon: 'Gift', color: '#EC4899' },
-    { name: 'Khác (Thu)', type: 'income', icon: 'MoreHorizontal', color: '#6B7280' },
+    { name: 'Khác (Thu Nhập)', type: 'income', icon: 'MoreHorizontal', color: '#6B7280' },
   ];
 
   const insertQuery = `

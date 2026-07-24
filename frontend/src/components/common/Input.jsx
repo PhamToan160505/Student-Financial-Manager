@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 /**
  * Reusable Input component with label, error message, and optional left/right icons.
@@ -13,17 +14,27 @@ export default function Input({
   error = '',
   icon: Icon = null,
   rightElement = null,
+  actionRight = null,
   disabled = false,
   required = false,
   className = '',
   ...props
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === 'password';
+  const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+
   return (
     <div className={`w-full ${className}`}>
-      {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-neutral-maintext mb-1.5">
-          {label} {required && <span className="text-danger">*</span>}
-        </label>
+      {(label || actionRight) && (
+        <div className="flex items-center justify-between mb-1.5">
+          {label && (
+            <label htmlFor={id} className="block text-sm font-medium text-neutral-maintext">
+              {label} {required && <span className="text-danger">*</span>}
+            </label>
+          )}
+          {actionRight && <div>{actionRight}</div>}
+        </div>
       )}
       <div className="relative rounded-xl shadow-sm">
         {Icon && (
@@ -33,7 +44,7 @@ export default function Input({
         )}
         <input
           id={id}
-          type={type}
+          type={inputType}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
@@ -41,12 +52,21 @@ export default function Input({
           required={required}
           className={`block w-full rounded-xl border ${
             error ? 'border-danger text-danger focus:ring-danger focus:border-danger' : 'border-neutral-border text-neutral-maintext focus:ring-primary focus:border-primary'
-          } ${Icon ? 'pl-10' : 'pl-4'} ${rightElement ? 'pr-10' : 'pr-4'} py-2.5 text-sm bg-white placeholder-neutral-subtext/60 focus:outline-none focus:ring-2 transition-all disabled:bg-neutral-bg disabled:cursor-not-allowed`}
+          } ${Icon ? 'pl-10' : 'pl-4'} ${rightElement || isPassword ? 'pr-10' : 'pr-4'} py-2.5 text-sm bg-white placeholder-neutral-subtext/60 focus:outline-none focus:ring-2 transition-all disabled:bg-neutral-bg disabled:cursor-not-allowed`}
           {...props}
         />
-        {rightElement && (
+        {(rightElement || isPassword) && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            {rightElement}
+            {isPassword ? (
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-neutral-subtext hover:text-neutral-maintext focus:outline-none p-1 rounded transition-colors"
+                tabIndex="-1"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            ) : rightElement}
           </div>
         )}
       </div>

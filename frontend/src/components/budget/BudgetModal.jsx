@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, PieChart, AlertCircle, Check } from 'lucide-react';
 import Button from '../common/Button';
+import ConfirmModal from '../common/ConfirmModal';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { getCategoryEmoji } from '../../utils/emoji';
 
 /**
  * BudgetModal - Modal form for setting or editing monthly category budget limits
@@ -12,6 +14,7 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
   const [amountStr, setAmountStr] = useState('');
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -55,7 +58,14 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
       return;
     }
 
+    setShowConfirm(true);
+  };
+
+  const executeSubmit = async () => {
+    setShowConfirm(false);
     setSaving(true);
+    
+    const numAmount = Number(amountStr.replace(/[^0-9.]/g, ''));
     const success = await onSave({
       category_id: Number(categoryId),
       amount: numAmount,
@@ -72,6 +82,7 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
   const suggestedAmounts = [500000, 1000000, 2000000, 3000000, 5000000];
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-neutral-border animate-scaleUp">
         {/* Modal Header */}
@@ -98,7 +109,7 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5" noValidate>
           {error && (
             <div className="p-3.5 rounded-xl bg-danger-light border border-danger/30 text-danger text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -128,7 +139,7 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
               <option value="">-- Chọn danh mục --</option>
               {categories?.map(cat => (
                 <option key={cat.category_id} value={cat.category_id}>
-                  {cat.category_name} {cat.is_budgeted && cat.category_id !== selectedCategory?.category_id ? `(Đã có hạn mức: ${formatCurrency(cat.amount)})` : ''}
+                  {getCategoryEmoji(cat.category_icon)} {cat.category_name} {cat.is_budgeted && cat.category_id !== selectedCategory?.category_id ? `(Đã có hạn mức: ${formatCurrency(cat.amount)})` : ''}
                 </option>
               ))}
             </select>
@@ -210,8 +221,19 @@ export default function BudgetModal({ isOpen, onClose, onSave, categories, selec
               {saving ? 'Đang lưu...' : selectedCategory && selectedCategory.is_budgeted ? 'Cập nhật hạn mức' : 'Lưu hạn mức'}
             </Button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={executeSubmit}
+        title={selectedCategory && selectedCategory.is_budgeted ? 'Cập nhật hạn mức' : 'Thiết lập hạn mức mới'}
+        message={selectedCategory && selectedCategory.is_budgeted ? 'Bạn có chắc muốn cập nhật hạn mức chi tiêu này không?' : 'Bạn có chắc muốn thiết lập hạn mức chi tiêu này không?'}
+        confirmLabel="Đồng ý"
+        cancelLabel="Hủy"
+        type="info"
+      />
+    </>
   );
 }

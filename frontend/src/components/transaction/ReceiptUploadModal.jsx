@@ -5,6 +5,7 @@ import receiptService from '../../services/receipt.service';
 import transactionService from '../../services/transaction.service';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { getCategoryEmoji } from '../../utils/emoji';
 
 /**
  * ReceiptUploadModal - AI OCR scanning, image preview, and categorization form
@@ -118,7 +119,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
       });
 
       setStep('review');
-      toast.success('🎉 Quét hóa đơn AI thành công!');
+      toast.success('Quét hóa đơn AI thành công!');
     } catch (err) {
       clearTimeout(progressTimer1);
       clearTimeout(progressTimer2);
@@ -184,22 +185,22 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-neutral-border overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-primary/5">
+        <div className="px-6 py-4 border-b border-neutral-border flex items-center justify-between bg-primary/5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Quét & Phân Loại Hóa Đơn AI</h3>
-              <p className="text-xs text-muted-foreground">Tesseract.js (vie+eng) & Groq AI (openai/gpt-oss-120b)</p>
+              <h3 className="font-semibold text-lg text-neutral-maintext">Quét & Phân Loại Hóa Đơn AI</h3>
+              <p className="text-xs text-neutral-subtext">Tesseract.js (vie+eng) & Groq AI (openai/gpt-oss-120b)</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="p-1.5 rounded-lg text-neutral-subtext hover:text-neutral-maintext hover:bg-neutral-bg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -210,12 +211,12 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
           
           {/* STEP 1: UPLOAD / CAPTURE */}
           {step === 'upload' && (
-            <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-border rounded-xl bg-card hover:border-primary/50 transition-colors text-center">
+            <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-neutral-border rounded-xl bg-white hover:border-primary/50 transition-colors text-center">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-inner">
                 <Camera className="w-8 h-8" />
               </div>
-              <h4 className="font-semibold text-base text-foreground mb-1">Chụp ảnh hoặc chọn hóa đơn</h4>
-              <p className="text-sm text-muted-foreground max-w-md mb-6">
+              <h4 className="font-semibold text-base text-neutral-maintext mb-1">Chụp ảnh hoặc chọn hóa đơn</h4>
+              <p className="text-sm text-neutral-subtext max-w-md mb-6">
                 Hỗ trợ ảnh hóa đơn bán lẻ, siêu thị, Highlands, Circle K, ShopeePay (định dạng JPG, PNG, WEBP tối đa 5MB)
               </p>
 
@@ -226,14 +227,14 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                   icon={Camera}
                   className="shadow-md"
                 >
-                  📷 Chụp ảnh camera ngay
+                  Chụp ảnh camera ngay
                 </Button>
                 <Button 
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   icon={Upload}
                 >
-                  📁 Chọn file ảnh từ máy
+                  Chọn file ảnh từ máy
                 </Button>
               </div>
 
@@ -261,7 +262,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
           {/* STEP 2: SCANNING & PROCESSING ANIMATION */}
           {step === 'scanning' && (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="relative w-48 h-64 rounded-xl overflow-hidden shadow-lg border border-border mb-6 bg-black/10">
+              <div className="relative w-48 h-64 rounded-xl overflow-hidden shadow-lg border border-neutral-border mb-6 bg-black/10">
                 {imagePreviewUrl && (
                   <img src={imagePreviewUrl} alt="Receipt Preview" className="w-full h-full object-cover opacity-80" />
                 )}
@@ -274,7 +275,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                 <RefreshCw className="w-5 h-5 animate-spin" />
                 <span>{scanProgressText}</span>
               </div>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <p className="text-xs text-neutral-subtext max-w-sm">
                 AI đang nhận diện chữ tiếng Việt có dấu và phân loại tự động vào danh mục chi tiêu của bạn...
               </p>
             </div>
@@ -286,7 +287,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
               
               {/* Left Column: Image Preview & OCR Raw Text */}
               <div className="flex flex-col gap-4">
-                <div className="relative rounded-xl overflow-hidden border border-border bg-black/5 aspect-[3/4] flex items-center justify-center">
+                <div className="relative rounded-xl overflow-hidden border border-neutral-border bg-black/5 aspect-[3/4] flex items-center justify-center">
                   <img 
                     src={imagePreviewUrl || receiptData.imageUrl} 
                     alt="Receipt" 
@@ -298,11 +299,11 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                 </div>
 
                 {receiptData.ocrRawText && (
-                  <details className="text-xs border border-border rounded-lg p-2.5 bg-muted/30">
-                    <summary className="font-medium text-muted-foreground cursor-pointer flex items-center gap-1">
+                  <details className="text-xs border border-neutral-border rounded-lg p-2.5 bg-neutral-bg/30">
+                    <summary className="font-medium text-neutral-subtext cursor-pointer flex items-center gap-1">
                       <FileText className="w-3.5 h-3.5" /> Xem văn bản thô bóc tách được (OCR)
                     </summary>
-                    <pre className="mt-2 p-2 bg-card rounded border border-border text-foreground font-mono text-[10px] whitespace-pre-wrap max-h-32 overflow-y-auto">
+                    <pre className="mt-2 p-2 bg-white rounded border border-neutral-border text-neutral-maintext font-mono text-[10px] whitespace-pre-wrap max-h-32 overflow-y-auto">
                       {receiptData.ocrRawText}
                     </pre>
                   </details>
@@ -310,13 +311,13 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
               </div>
 
               {/* Right Column: Editable Transaction Form */}
-              <form onSubmit={handleSubmitTransaction} className="flex flex-col gap-4">
+              <form onSubmit={handleSubmitTransaction} className="flex flex-col gap-4" noValidate>
                 
                 {/* Graceful Degradation / Partial Scan Warning Banner */}
                 {isDegradedOrPartial && (
                   <div className="p-3 rounded-xl bg-warning-light/20 border border-warning/30 flex items-start gap-2.5">
                     <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-foreground">
+                    <div className="text-xs text-neutral-maintext">
                       <p className="font-semibold text-warning mb-0.5">AI bóc tách được một phần thông tin</p>
                       <p>Hệ thống đã đọc được chữ OCR từ ảnh. Tuy nhiên, AI chưa điền tự động số tiền/danh mục (có thể do server chưa cấu hình <b>GROQ_API_KEY</b> trong file .env hoặc ảnh có nhiều số tiền phức tạp). Vui lòng kiểm tra và nhập bổ sung bên dưới.</p>
                     </div>
@@ -326,7 +327,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                 {!isDegradedOrPartial && (
                   <div className="p-3 rounded-xl bg-success-light/20 border border-success/30 flex items-center gap-2.5">
                     <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
-                    <div className="text-xs text-foreground">
+                    <div className="text-xs text-neutral-maintext">
                       <span className="font-semibold text-success">AI bóc tách hoàn tất!</span> Kiểm tra nhanh và bấm lưu vào sổ thu chi.
                     </div>
                   </div>
@@ -334,7 +335,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
 
                 {/* Amount Field */}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-maintext mb-1.5">
                     Số tiền thanh toán <span className="text-danger">*</span>
                   </label>
                   <div className="relative">
@@ -347,9 +348,9 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                       value={formData.amount}
                       onChange={handleInputChange}
                       placeholder="VD: 45000"
-                      className="w-full pl-3 pr-16 py-2 rounded-xl border border-input bg-background text-foreground font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full pl-3 pr-16 py-2 rounded-xl border border-neutral-border bg-white text-neutral-maintext font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
-                    <span className="absolute right-3 top-2 text-xs font-medium text-muted-foreground">VNĐ</span>
+                    <span className="absolute right-3 top-2 text-xs font-medium text-neutral-subtext">VNĐ</span>
                   </div>
                   {formData.amount && (
                     <p className="text-[11px] text-primary mt-1 font-medium">
@@ -360,7 +361,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
 
                 {/* Merchant / Store */}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-maintext mb-1.5">
                     Tên cửa hàng / Dịch vụ
                   </label>
                   <input 
@@ -369,13 +370,13 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                     value={formData.merchant}
                     onChange={handleInputChange}
                     placeholder="VD: Highlands Coffee, Circle K..."
-                    className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-border bg-white text-neutral-maintext text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
 
                 {/* Category Dropdown */}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-maintext mb-1.5">
                     Danh mục chi tiêu <span className="text-danger">*</span>
                   </label>
                   <select 
@@ -383,12 +384,12 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                     value={formData.categoryId}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-border bg-white text-neutral-maintext text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">-- Chọn danh mục --</option>
                     {expenseCategories.map(cat => (
                       <option key={cat.id} value={cat.id}>
-                        {cat.name} ({cat.type === 'expense' ? 'Chi' : 'Thu'})
+                        {getCategoryEmoji(cat.icon)} {cat.name} ({cat.type === 'expense' ? 'Chi' : 'Thu'})
                       </option>
                     ))}
                   </select>
@@ -396,7 +397,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
 
                 {/* Transaction Date */}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-maintext mb-1.5">
                     Ngày giao dịch
                   </label>
                   <input 
@@ -405,13 +406,13 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                     value={formData.transactionDate}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-border bg-white text-neutral-maintext text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
 
                 {/* Note */}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-maintext mb-1.5">
                     Ghi chú
                   </label>
                   <input 
@@ -420,12 +421,12 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                     value={formData.note}
                     onChange={handleInputChange}
                     placeholder="VD: Uống cà phê cùng nhóm đồ án..."
-                    className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-border bg-white text-neutral-maintext text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
 
                 {/* Status Indicator for Audit Trail (`nguon`) */}
-                <div className="text-[11px] text-muted-foreground pt-1 flex items-center justify-between border-t border-border">
+                <div className="text-[11px] text-neutral-subtext pt-1 flex items-center justify-between border-t border-neutral-border">
                   <span>Nguồn ghi nhận:</span>
                   <span className={`font-semibold ${isModifiedByUser() ? 'text-warning' : 'text-primary'}`}>
                     {isModifiedByUser() ? '✍️ Điều chỉnh thủ công (manual)' : '🤖 AI tự động bóc tách (ai)'}

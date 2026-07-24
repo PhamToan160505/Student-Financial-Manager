@@ -122,6 +122,27 @@ const budgetModel = {
     const query = `SELECT id FROM budgets WHERE category_id = ? LIMIT 1`;
     const [rows] = await pool.query(query, [categoryId]);
     return rows.length > 0;
+  },
+
+  /**
+   * Calculate total budgeted amount for a month excluding a specific category.
+   * Used for validating that new budgets don't exceed total income.
+   */
+  async sumExcludingCategory({ userId, month, excludeCategoryId }) {
+    let query = `
+      SELECT COALESCE(SUM(amount), 0) AS total 
+      FROM budgets 
+      WHERE user_id = ? AND month = ?
+    `;
+    const params = [userId, month];
+
+    if (excludeCategoryId) {
+      query += ` AND category_id != ?`;
+      params.push(excludeCategoryId);
+    }
+
+    const [rows] = await pool.query(query, params);
+    return Number(rows[0]?.total || 0);
   }
 };
 

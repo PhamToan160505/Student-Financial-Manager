@@ -58,6 +58,11 @@ export default function useBudget() {
 
   useEffect(() => {
     fetchBudgets();
+    
+    // Auto-refresh when AI Chat creates budget/transaction
+    const handleUpdate = () => fetchBudgets();
+    window.addEventListener('financial-data-updated', handleUpdate);
+    return () => window.removeEventListener('financial-data-updated', handleUpdate);
   }, [fetchBudgets]);
 
   const upsertBudget = async ({ category_id, amount, targetMonth }) => {

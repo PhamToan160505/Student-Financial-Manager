@@ -1,5 +1,5 @@
 const multer = require('multer');
-const cloudinary = require('../config/cloudinary');
+const { cloudinary } = require('../config/cloudinary');
 const receiptModel = require('../models/receipt.model');
 const transactionModel = require('../models/transaction.model');
 const ocrService = require('../services/ocr.service');

@@ -35,7 +35,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
         <div className={`p-4.5 rounded-2xl border flex items-start gap-3.5 transition-all shadow-sm ${
           hasOverBudget 
             ? 'bg-danger-light border-danger text-danger' 
-            : 'bg-warning-light border-warning text-warning'
+            : 'bg-warning-light border-warning text-warning-dark'
         }`}>
           <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 animate-bounce" />
           <div className="space-y-1.5 flex-1">
@@ -49,7 +49,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
                 <span 
                   key={w.category_id}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white shadow-2xs border ${
-                    w.percent_used >= 100 ? 'border-danger text-danger' : 'border-warning text-warning'
+                    w.percent_used >= 100 ? 'border-danger text-danger' : 'border-warning text-warning-dark'
                   }`}
                 >
                   <span>{w.category_name}</span>
@@ -91,9 +91,9 @@ export default function BudgetSummary({ summary, warnings, loading }) {
         {/* Total Spent in Budget Card */}
         <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-subtext mb-2">
-            <span className="text-sm font-medium">Đã chi trong ngân sách</span>
+            <span className="text-sm font-medium">Đã chi TÍNH ĐẾN HÔM NAY</span>
             <div className={`p-2 rounded-xl ${
-              percentOverall >= 100 ? 'bg-danger-light text-danger' : percentOverall >= 80 ? 'bg-warning-light text-warning' : 'bg-primary-light text-primary'
+              percentOverall >= 100 ? 'bg-danger-light text-danger' : percentOverall >= 80 ? 'bg-warning-light text-warning-dark' : 'bg-primary-light text-primary'
             }`}>
               <ArrowUpRight className="w-5 h-5" />
             </div>
@@ -101,7 +101,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
           <div>
             <div className="flex items-baseline gap-2">
               <p className={`text-xl sm:text-2xl font-bold tracking-tight ${
-                percentOverall >= 100 ? 'text-danger' : percentOverall >= 80 ? 'text-warning' : 'text-neutral-maintext'
+                percentOverall >= 100 ? 'text-danger' : percentOverall >= 80 ? 'text-warning-dark' : 'text-neutral-maintext'
               }`}>
                 {formatCurrency(totalSpentBudgeted)}
               </p>

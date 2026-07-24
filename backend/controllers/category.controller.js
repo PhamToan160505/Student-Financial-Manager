@@ -1,5 +1,6 @@
 const categoryModel = require('../models/category.model');
 const budgetModel = require('../models/budget.model');
+const transactionModel = require('../models/transaction.model');
 const { sendSuccess, sendError } = require('../utils/response');
 
 /**
@@ -82,10 +83,14 @@ async function deleteCategory(req, res, next) {
       return sendError(res, 'Không thể xóa danh mục mặc định của hệ thống', 403);
     }
 
-    // Enforce strict audit trail & historical data integrity (Point 4)
     const hasBudgets = await budgetModel.checkCategoryHasBudgets({ categoryId: id });
     if (hasBudgets) {
       return sendError(res, 'Danh mục này đã từng được thiết lập hạn mức ngân sách. Không thể xóa để bảo toàn lịch sử dữ liệu tài chính!', 400);
+    }
+    
+    const hasTransactions = await transactionModel.checkCategoryHasTransactions(id);
+    if (hasTransactions) {
+      return sendError(res, 'Danh mục này đã có giao dịch. Không thể xóa để bảo toàn lịch sử dữ liệu tài chính!', 400);
     }
 
     const affectedRows = await categoryModel.remove(id, req.user.id);

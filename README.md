@@ -1,4 +1,3 @@
-
 # README — Hướng Dẫn Xây Dựng Dự Án Quản Lý Tài Chính Sinh Viên
 
 > File này dành cho AI coding agent (Antigravity/Claude Code/Cursor...) đọc và triển khai theo đúng quy chuẩn dưới đây. Agent PHẢI tuân thủ nghiêm ngặt kiến trúc, quy tắc bảo mật, và convention được nêu — không tự ý thay đổi cấu trúc thư mục hay bỏ qua các bước validate.
@@ -35,12 +34,21 @@ Trước khi viết bất kỳ dòng code nào cho một chức năng mới, ho�
 
 ### 0.3. Tự kiểm tra sau khi hoàn thành mỗi phần
 
-Sau khi code xong một chức năng/module bất kỳ, agent PHẢI tự rà soát lại trước khi báo cáo hoàn thành:
+Sau khi code xong một chức năng/module bất kỳ, agent PHẢI tự rà soát lại trước khi báo cáo hoàn thành — gồm ĐỦ CẢ 2 lớp kiểm tra sau, không được chỉ dừng ở lớp code:
 
-- Đọc lại toàn bộ code vừa viết, kiểm tra lỗi cú pháp, logic sai, edge case bỏ sót
-- Kiểm tra tính nhất quán với các phần đã làm trước đó (naming, response format, cách gọi API...)
-- Đối chiếu lại với checklist bảo mật ở mục 10 nếu phần vừa làm liên quan đến auth/dữ liệu người dùng
-- Báo cáo ngắn gọn: đã làm gì, đã tự kiểm tra gì, có vấn đề/rủi ro gì cần chủ dự án lưu ý không
+**Lớp 1 — Đúng về mặt code:**
+
+* Đọc lại toàn bộ code vừa viết, kiểm tra lỗi cú pháp, logic sai, edge case bỏ sót
+* Kiểm tra tính nhất quán với các phần đã làm trước đó (naming, response format, cách gọi API...)
+* Đối chiếu lại với checklist bảo mật ở mục 10 nếu phần vừa làm liên quan đến auth/dữ liệu người dùng
+
+**Lớp 2 — Đúng về mặt trải nghiệm thực tế (KHÔNG được bỏ qua, kể cả khi Lớp 1 đã ổn):**
+
+* Tự thao tác thử chức năng vừa làm như 1 người dùng thật sẽ dùng (không chỉ đọc code rồi suy luận là "chắc chạy đúng") — bấm qua đủ các luồng chính: trường hợp bình thường, trường hợp dữ liệu rỗng/chưa có gì, trường hợp nhập sai/thiếu thông tin
+* Kiểm tra chức năng mới có tự nhiên, dễ hiểu, đúng kỳ vọng UX của người dùng hay không — không chỉ "chạy được" mà còn phải "dùng thấy hợp lý" (VD: thông báo lỗi có rõ ràng không, luồng thao tác có bị rối/thừa bước không, có nhất quán với các màn hình khác đã làm không)
+* Với thay đổi ở frontend: kiểm tra nhanh cả responsive cơ bản (mobile/desktop), không chỉ test trên 1 kích thước màn hình duy nhất
+* Nếu phát hiện chỗ nào trải nghiệm chưa ổn dù code không lỗi, PHẢI chủ động nêu ra trong báo cáo (mục dưới) thay vì im lặng bỏ qua vì "kỹ thuật đã đúng"
+* Báo cáo ngắn gọn: đã làm gì, đã tự kiểm tra gì (cả code lẫn trải nghiệm thực tế), có vấn đề/rủi ro/điểm UX chưa ổn nào cần chủ dự án lưu ý không
 
 ### 0.4. Cập nhật liên tục
 
@@ -427,3 +435,43 @@ Agent phải đảm bảo tính nhất quán xuyên suốt toàn bộ giao diệ
 - [ ] File upload giới hạn size + kiểm tra type, KHÔNG lưu ảnh trong MySQL, chỉ lưu URL Cloudinary
 - [ ] Biến `CLOUDINARY_*` nằm trong `.env`, không hardcode
 - [ ] Lỗi hệ thống không lộ ra response cho client
+
+---
+
+## 11. HƯỚNG DẪN CÀI ĐẶT & CHẠY LOCAL
+
+### Yêu cầu hệ thống
+
+- Node.js v18+
+- MySQL v8.0+
+
+### Bước 1: Clone & Cài đặt dependencies
+
+```bash
+# Cài đặt backend
+cd backend
+npm install
+
+# Cài đặt frontend
+cd ../frontend
+npm install
+```
+
+### Bước 2: Cấu hình biến môi trường (.env)
+
+- Copy file `backend/.env.example` thành `backend/.env` và điền các thông số: MySQL, JWT_SECRET, GROQ_API_KEY, CLOUDINARY_*.
+- Copy file `frontend/.env.example` thành `frontend/.env` và điền `VITE_API_URL` (nếu khác mặc định).
+
+### Bước 3: Chạy ứng dụng
+
+```bash
+# Mở terminal 1: Chạy Backend (Cổng 5001)
+cd backend
+npm run dev
+
+# Mở terminal 2: Chạy Frontend (Cổng 5174)
+cd frontend
+npm run dev
+```
+
+Ứng dụng sẽ tự động khởi tạo các bảng MySQL khi backend chạy lần đầu. Truy cập `http://localhost:5174` để sử dụng.

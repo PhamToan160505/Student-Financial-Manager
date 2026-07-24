@@ -40,9 +40,9 @@ export default function Modal({ isOpen, onClose, title, subtitle = '', children,
       />
 
       {/* Panel */}
-      <div className={`relative bg-white w-full ${sizes[size] || sizes.md} rounded-t-3xl sm:rounded-2xl shadow-2xl animate-slideUp`}>
+      <div className={`relative bg-white w-full ${sizes[size] || sizes.md} rounded-t-3xl sm:rounded-2xl shadow-2xl animate-slideUp flex flex-col max-h-[90vh] sm:max-h-[85vh]`}>
         {/* Header */}
-        <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-neutral-border">
+        <div className="flex-none flex items-start justify-between px-6 pt-6 pb-4 border-b border-neutral-border">
           <div>
             <h3 className="text-lg font-semibold text-neutral-maintext leading-tight">{title}</h3>
             {subtitle && <p className="text-sm text-neutral-subtext mt-0.5">{subtitle}</p>}
@@ -57,7 +57,7 @@ export default function Modal({ isOpen, onClose, title, subtitle = '', children,
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5">
+        <div className="px-6 py-5 flex-1 overflow-y-auto no-scrollbar">
           {children}
         </div>
       </div>

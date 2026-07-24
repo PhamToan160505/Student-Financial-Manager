@@ -23,6 +23,8 @@ export default {
         },
         warning: {
           DEFAULT: '#F59E0B', // amber-500 - Budget warning (80-99%)
+          dark: '#B45309',    // amber-700 - WCAG AA compliant text contrast on light/white bg
+          darker: '#9A3412',  // orange-800 - High contrast warning text
           light: '#FEF3C7',   // amber-100
         },
         neutral: {

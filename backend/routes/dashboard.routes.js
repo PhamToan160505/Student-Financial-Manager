@@ -12,4 +12,6 @@ router.get('/forecast', dashboardController.getForecast);
 // GET /api/dashboard/insight?month=YYYY-MM (singular per Spec 2.3)
 router.get('/insight', dashboardController.getInsight);
 
+router.get('/available-balance', dashboardController.getAvailableBalance);
+
 module.exports = router;

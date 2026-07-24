@@ -22,7 +22,7 @@ export default function ChatBubbleButton({ onClick, isOpen }) {
         </span>
       </div>
       <span className="text-sm font-bold tracking-tight pr-1 flex items-center gap-1">
-        AI Cố Vấn <Sparkles className="w-3.5 h-3.5 text-warning shrink-0" />
+        <Sparkles className="w-3.5 h-3.5 text-warning shrink-0" />AI Cố Vấn
       </span>
     </button>
   );

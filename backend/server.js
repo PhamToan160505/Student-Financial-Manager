@@ -21,6 +21,11 @@ const transactionModel = require('./models/transaction.model');
 const budgetModel = require('./models/budget.model');
 const insightCacheModel = require('./models/insightCache.model');
 const chatMessageModel = require('./models/chatMessage.model');
+const authModel = require('./models/auth.model');
+const savingsJarModel = require('./models/savingsJar.model');
+const jarTransactionModel = require('./models/jarTransaction.model');
+
+const savingsJarRoutes = require('./routes/savingsJar.routes');
 
 const app = express();
 
@@ -44,6 +49,8 @@ app.use(cors({
   },
   credentials: true
 }));
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -65,6 +72,7 @@ app.use('/api/dashboard', verifyToken, dashboardRoutes);
 app.use('/api/budgets', verifyToken, budgetRoutes);
 app.use('/api/receipts', verifyToken, receiptRoutes);
 app.use('/api/chat', verifyToken, chatRoutes);
+app.use('/api/jars', verifyToken, savingsJarRoutes);
 
 // 4. Handle 404 Routes
 app.use('*', (req, res) => {
@@ -93,6 +101,9 @@ if (require.main === module) {
     await budgetModel.initTable();
     await insightCacheModel.initTable();
     await chatMessageModel.initTable();
+    await authModel.initTable();
+    await savingsJarModel.initTable();
+    await jarTransactionModel.initTable();
     console.log(`==================================================`);
   });
 }

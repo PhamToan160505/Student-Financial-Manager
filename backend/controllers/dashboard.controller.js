@@ -3,6 +3,9 @@ const forecastService = require('../services/forecast.service');
 const insightService = require('../services/insight.service');
 const { getCurrentMonthVN } = require('../utils/timezone');
 const { sendSuccess } = require('../utils/response');
+const savingsJarModel = require('../models/savingsJar.model');
+const transactionModel = require('../models/transaction.model');
+const balanceService = require('../services/balance.service');
 
 /**
  * Dashboard Controller
@@ -127,8 +130,21 @@ async function getInsight(req, res, next) {
   }
 }
 
+/**
+ * Get Available Balance (All-time Actual Balance minus Locked Savings)
+ */
+async function getAvailableBalance(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const balanceData = await balanceService.getAvailableBalance(userId);
+    return sendSuccess(res, balanceData, 'Lấy số dư khả dụng thành công');
+  } catch (err) {
+    next(err);
+  }
+}
 module.exports = {
   getDashboardStats,
   getForecast,
-  getInsight
+  getInsight,
+  getAvailableBalance
 };

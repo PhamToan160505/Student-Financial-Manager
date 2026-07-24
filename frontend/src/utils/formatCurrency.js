@@ -3,8 +3,8 @@
  * Example: 50000 -> 50,000 đ
  */
 export function formatCurrency(amount) {
-  if (amount === undefined || amount === null || isNaN(amount)) return '0 đ';
-  return Number(amount).toLocaleString('vi-VN') + ' đ';
+  if (amount === undefined || amount === null || isNaN(amount)) return '0\u00A0đ';
+  return Number(amount).toLocaleString('vi-VN') + '\u00A0đ';
 }
 
 /**

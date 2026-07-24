@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Trash2, Bot, User, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import ActionCard from './ActionCard';
+import BudgetSuggestCard from './BudgetSuggestCard';
 
 /**
  * ChatDrawer - Slide-over panel from right edge displaying 2-color chat bubbles,
@@ -12,7 +14,10 @@ export default function ChatDrawer({
   loadingHistory,
   sending,
   onSendMessage,
-  onClearHistory
+  onClearHistory,
+  onConfirmAction,
+  onConfirmBudget,
+  onCancelAction
 }) {
   const [inputText, setInputText] = useState('');
   const [showConfirmClear, setShowConfirmClear] = useState(false);
@@ -49,15 +54,9 @@ export default function ChatDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end animate-fadeIn">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-2xs transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Drawer Panel */}
-      <div className="relative w-full sm:w-[440px] bg-white h-full shadow-2xl flex flex-col border-l border-neutral-border z-10">
+    <div className="fixed z-50 animate-scaleUp origin-bottom-right bottom-0 right-0 w-full h-full sm:w-auto sm:h-auto sm:bottom-0 sm:right-16">
+      {/* Panel */}
+      <div className="relative w-full h-full sm:w-[360px] sm:h-[520px] sm:max-h-[85vh] bg-white sm:rounded-t-2xl sm:rounded-b-none shadow-[0_-5px_25px_-5px_rgba(0,0,0,0.1)] flex flex-col sm:border sm:border-b-0 border-neutral-border overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-neutral-border bg-neutral-bg/80 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
@@ -167,9 +166,58 @@ export default function ChatDrawer({
             </div>
           )}
 
-          {/* Render 2-color Chat Bubbles */}
+          {/* Render 2-color Chat Bubbles + Action Cards */}
           {messages.map((msg, index) => {
             const isUser = msg.role === 'user';
+
+            // Render Action Card for AI-proposed transactions
+            if (msg.type === 'action_pending') {
+              return (
+                <div key={msg.id || index} className="flex items-start gap-2.5 justify-start animate-fadeIn">
+                  <div className="w-7 h-7 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <ActionCard
+                    payload={msg.actionPayload}
+                    onConfirm={(payload) => onConfirmAction && onConfirmAction(msg.id, payload)}
+                    onCancel={() => onCancelAction && onCancelAction(msg.id)}
+                  />
+                </div>
+              );
+            }
+
+            // V2: Render Budget Suggest Card for unbudgeted categories
+            if (msg.type === 'budget_required') {
+              return (
+                <div key={msg.id || index} className="flex items-start gap-2.5 justify-start animate-fadeIn">
+                  <div className="w-7 h-7 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <BudgetSuggestCard
+                    payload={msg.actionPayload}
+                    suggestedAmount={msg.suggestedAmount}
+                    error={msg._error}
+                    onConfirm={(payload) => onConfirmBudget && onConfirmBudget(msg.id, payload)}
+                    onCancel={() => onCancelAction && onCancelAction(msg.id)}
+                  />
+                </div>
+              );
+            }
+
+            // Render cancelled/confirmed state as a muted text bubble
+            if (msg.type === 'cancelled' || msg.type === 'confirmed' || msg.type === 'confirmed_budget') {
+              return (
+                <div key={msg.id || index} className="flex items-start gap-2.5 justify-start">
+                  <div className="w-7 h-7 rounded-lg bg-neutral-bg text-neutral-subtext flex items-center justify-center shrink-0 mt-0.5 border border-neutral-border">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <div className="rounded-2xl p-3 text-xs text-neutral-subtext bg-neutral-bg border border-neutral-border/60 rounded-tl-2xs max-w-[86%] italic whitespace-pre-line">
+                    {msg.content}
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={msg.id || index}
@@ -198,6 +246,7 @@ export default function ChatDrawer({
             );
           })}
 
+
           {/* Typing indicator */}
           {sending && (
             <div className="flex items-start gap-2.5 justify-start animate-fadeIn">
@@ -216,21 +265,21 @@ export default function ChatDrawer({
 
         {/* Input Footer Area */}
         <form onSubmit={handleSend} className="p-3 border-t border-neutral-border bg-white shrink-0">
-          <div className="relative flex items-center">
+          <div className="relative">
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Hỏi số liệu tháng này hoặc mẹo tài chính... (Enter để gửi)"
+              placeholder="Hỏi số liệu..."
               disabled={sending}
-              className="w-full bg-neutral-bg border border-neutral-border focus:border-primary focus:bg-white rounded-xl py-2.5 pl-3.5 pr-12 text-sm text-neutral-maintext placeholder:text-neutral-subtext focus:outline-none resize-none transition-all"
+              className="w-full bg-neutral-bg border border-neutral-border focus:border-primary focus:bg-white rounded-xl py-3 pl-4 pr-12 text-sm text-neutral-maintext placeholder:text-neutral-subtext focus:outline-none resize-none transition-all block"
             />
             <button
               type="submit"
               disabled={!inputText.trim() || sending || inputText.trim().length > 500}
-              className="absolute right-1.5 p-2 bg-primary hover:bg-primary-hover disabled:bg-neutral-border disabled:text-neutral-subtext text-white rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
+              className="absolute right-2 bottom-2 p-1.5 bg-primary hover:bg-primary-hover disabled:bg-transparent disabled:text-neutral-subtext text-white rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
               title="Gửi tin nhắn"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

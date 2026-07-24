@@ -4,16 +4,24 @@ import { useCategories } from '../hooks/useCategories';
 import transactionService from '../services/transaction.service';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import Navbar from '../components/common/Navbar';
 import DashboardSummary from '../components/dashboard/DashboardSummary';
 import AnalyticsPanel from '../components/dashboard/AnalyticsPanel';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import TransactionModal from '../components/transaction/TransactionModal';
+import MonthPicker from '../components/common/MonthPicker';
 import { LayoutDashboard, Calendar as CalendarIcon, RefreshCw, Plus, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function DashboardPage({ onNavigateToPage }) {
-  const { stats, loading, error, month, setMonth, refetch } = useDashboard();
+  const { stats, loading, error, month, setMonth, refetch, fetchAvailableBalance } = useDashboard();
   const { categories } = useCategories();
+  
+  const [availableBalanceData, setAvailableBalanceData] = useState(null);
+
+  React.useEffect(() => {
+    fetchAvailableBalance().then(setAvailableBalanceData);
+  }, [fetchAvailableBalance]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -30,56 +38,53 @@ export default function DashboardPage({ onNavigateToPage }) {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-primary" />
-            Trung Tâm Chỉ Huy Tài Chính
-          </h2>
-          <p className="text-sm text-neutral-subtext mt-0.5">
-            Cái nhìn toàn cảnh về dòng tiền, tỷ trọng chi tiêu và sức khỏe tài chính
-          </p>
-        </div>
+    <>
+      <Navbar activePage="dashboard" onNavigateToPage={onNavigateToPage} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+        <div className="space-y-6 animate-fadeIn">
+          {/* Page Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
+                <LayoutDashboard className="w-5 h-5 text-primary" />
+                Trung Tâm Chỉ Huy Tài Chính
+              </h2>
+              <p className="text-sm text-neutral-subtext mt-0.5">
+                Cái nhìn toàn cảnh về dòng tiền, tỷ trọng chi tiêu và sức khỏe tài chính
+              </p>
+            </div>
 
-        {/* Month Selector + Actions */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-neutral-border shadow-xs">
-            <CalendarIcon className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-neutral-subtext">Tháng:</span>
-            <input
-              type="month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className="text-sm font-bold text-neutral-maintext bg-transparent focus:outline-none cursor-pointer"
-            />
+            {/* Month Selector + Actions */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-neutral-border shadow-xs">
+                <CalendarIcon className="w-4 h-4 text-primary" />
+                <MonthPicker
+                  value={month}
+                  onChange={setMonth}
+                  className="text-sm font-bold text-neutral-maintext bg-transparent focus:outline-none cursor-pointer whitespace-nowrap"
+                />
+              </div>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={RefreshCw}
+                onClick={refetch}
+                disabled={loading}
+                title="Làm mới dữ liệu"
+              />
+
+            </div>
           </div>
-
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={RefreshCw}
-            onClick={refetch}
-            disabled={loading}
-            title="Làm mới dữ liệu"
-          />
-
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            onClick={() => setShowCreateModal(true)}
-          >
-            Thêm khoản thu/chi
-          </Button>
-        </div>
-      </div>
 
       {/* States: Loading / Error / Data */}
       {loading && (
         <div className="space-y-6">
-          <DashboardSummary loading={true} />
+          <DashboardSummary 
+            stats={stats} 
+            loading={loading} 
+            availableBalanceData={availableBalanceData} 
+          />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-2xl border border-neutral-border h-80 animate-pulse" />
             <div className="bg-white rounded-2xl border border-neutral-border h-80 animate-pulse" />
@@ -105,7 +110,7 @@ export default function DashboardPage({ onNavigateToPage }) {
       {!loading && !error && (
         <>
           {/* 1. 4 KPI Cards */}
-          <DashboardSummary summary={stats.summary} loading={false} />
+          <DashboardSummary summary={stats.summary} loading={false} availableBalanceData={availableBalanceData} />
 
           {/* 2. Unified MoMo-style Analytics Panel */}
           <div className="w-full">
@@ -135,6 +140,8 @@ export default function DashboardPage({ onNavigateToPage }) {
         onSubmit={handleCreateTransaction}
         categories={categories}
       />
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

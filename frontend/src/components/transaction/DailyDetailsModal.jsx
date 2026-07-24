@@ -18,7 +18,7 @@ export default function DailyDetailsModal({
 }) {
   if (!isOpen || !dateInfo) return null;
 
-  const { dateStr, transactions = [] } = dateInfo;
+  const { dateStr, transactions = [], isValidDate = true } = dateInfo;
 
   // Format date DD/MM/YYYY
   const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '';
@@ -99,18 +99,20 @@ export default function DailyDetailsModal({
           >
             Đóng
           </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            className="flex-1"
-            onClick={() => {
-              onClose();
-              onAddForDate(dateStr);
-            }}
-          >
-            Thêm khoản thu/chi ngày này
-          </Button>
+          {isValidDate && (
+            <Button
+              variant="primary"
+              size="md"
+              icon={Plus}
+              className="flex-1"
+              onClick={() => {
+                onClose();
+                onAddForDate(dateStr);
+              }}
+            >
+              Thêm giao dịch ngày này
+            </Button>
+          )}
         </div>
       </div>
     </Modal>

@@ -11,6 +11,8 @@
   --color-danger: #DC2626;
   --color-danger-light: #FEF2F2;
   --color-warning: #F59E0B;
+  --color-warning-dark: #B45309;
+  --color-warning-darker: #9A3412;
   --color-warning-light: #FEF3C7;
   --color-neutral-border: #E5E7EB;
   --color-neutral-subtext: #4B5563;
@@ -23,5 +25,15 @@
     @apply bg-neutral-bg text-neutral-maintext antialiased font-sans;
     margin: 0;
     padding: 0;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 }

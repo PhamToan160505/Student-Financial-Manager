@@ -6,14 +6,15 @@ const rateLimit = require('express-rate-limit');
  */
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per IP
+  max: 5, // 5 requests per key
   message: {
     success: false,
     data: null,
-    message: 'Quá nhiều lần thử đăng nhập thất bại. Vui lòng thử lại sau 15 phút để đảm bảo an toàn.'
+    message: 'Quá nhiều yêu cầu thất bại. Vui lòng thử lại sau 15 phút để đảm bảo an toàn.'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true // Chỉ tính các request thất bại (sai pass/otp)
 });
 
 module.exports = {

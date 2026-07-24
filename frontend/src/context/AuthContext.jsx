@@ -41,13 +41,18 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const res = await authService.login({ email, password });
     if (res.success && res.data?.token) {
+      // Set token to localStorage so subsequent API calls (like remember-device) can use it
       localStorage.setItem('token', res.data.token);
-      setToken(res.data.token);
-      setUser(res.data.user);
-      toast.success(res.message || 'Đăng nhập thành công!');
+      // Return data but DO NOT set user state yet (to hold UI at LoginPage for RememberMe modal)
       return res;
     }
     throw new Error(res.message || 'Đăng nhập thất bại');
+  };
+
+  const completeLogin = (token, user) => {
+    setToken(token);
+    setUser(user);
+    toast.success('Đăng nhập thành công!');
   };
 
   const register = async (fullName, email, password) => {
@@ -59,11 +64,72 @@ export function AuthProvider({ children }) {
     throw new Error(res.message || 'Đăng ký thất bại');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn('Server logout failed:', err);
+    }
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     toast.success('Đã đăng xuất khỏi tài khoản');
+  };
+
+  const rememberDevice = async () => {
+    return await authService.rememberDevice();
+  };
+
+  const verifyOtp = async (email, otp) => {
+    const res = await authService.verifyOtp({ email, otp });
+    if (res.success && res.data?.token) {
+      localStorage.setItem('token', res.data.token);
+      return res;
+    }
+    throw new Error(res.message || 'Xác thực OTP thất bại');
+  };
+
+  const resendOtp = async (email) => {
+    const res = await authService.resendOtp({ email });
+    if (res.success) {
+      toast.success(res.message || 'Đã gửi lại mã OTP');
+      return res;
+    }
+    throw new Error(res.message || 'Gửi lại OTP thất bại');
+  };
+
+  const forgotPassword = async (email) => {
+    const res = await authService.forgotPassword({ email });
+    if (res.success) {
+      toast.success(res.message || 'Mã khôi phục đã được gửi');
+      return res;
+    }
+    throw new Error(res.message || 'Yêu cầu thất bại');
+  };
+
+  const verifyResetOtp = async (email, otp) => {
+    const res = await authService.verifyResetOtp({ email, otp });
+    if (res.success) return res;
+    throw new Error(res.message || 'Xác thực OTP thất bại');
+  };
+
+  const resetPassword = async (email, otp, newPassword) => {
+    const res = await authService.resetPassword({ email, otp, newPassword });
+    if (res.success && res.data?.token) {
+      localStorage.setItem('token', res.data.token);
+      return res;
+    }
+    throw new Error(res.message || 'Khôi phục thất bại');
+  };
+
+  const updateProfile = async (formData) => {
+    const res = await authService.updateProfile(formData);
+    if (res.success && res.data?.user) {
+      setUser(res.data.user);
+      toast.success(res.message || 'Cập nhật hồ sơ thành công');
+      return res;
+    }
+    throw new Error(res.message || 'Cập nhật thất bại');
   };
 
   const value = {
@@ -72,8 +138,17 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     loading,
     login,
+    completeLogin,
     register,
-    logout
+    logout,
+    rememberDevice,
+    verifyOtp,
+    resendOtp,
+    forgotPassword,
+    verifyResetOtp,
+    resetPassword,
+    updateProfile,
+    updateUser: setUser
   };
 
   return (

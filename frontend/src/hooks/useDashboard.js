@@ -70,6 +70,18 @@ export function useDashboard() {
     }
   }, [month]);
 
+  const fetchAvailableBalance = useCallback(async () => {
+    try {
+      const res = await dashboardService.getAvailableBalance();
+      if (res.success && res.data) {
+        return res.data;
+      }
+    } catch (err) {
+      console.warn('[useDashboard] Available balance fetch warning:', err.message);
+    }
+    return null;
+  }, []);
+
   const fetchAll = useCallback(async () => {
     fetchStatsAndForecast();
     fetchInsight();
@@ -77,6 +89,11 @@ export function useDashboard() {
 
   useEffect(() => {
     fetchAll();
+    
+    // Auto-refresh when AI Chat creates budget/transaction
+    const handleUpdate = () => fetchAll();
+    window.addEventListener('financial-data-updated', handleUpdate);
+    return () => window.removeEventListener('financial-data-updated', handleUpdate);
   }, [fetchAll]);
 
   return {
@@ -89,6 +106,7 @@ export function useDashboard() {
     month,
     setMonth,
     refetch: fetchAll,
-    refetchInsight: fetchInsight
+    refetchInsight: fetchInsight,
+    fetchAvailableBalance
   };
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PieChart, Plus, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import useBudget from '../hooks/useBudget';
+import Navbar from '../components/common/Navbar';
 import BudgetSummary from '../components/budget/BudgetSummary';
 import CashflowForecastCard from '../components/budget/CashflowForecastCard';
 import BudgetCard from '../components/budget/BudgetCard';
@@ -11,7 +12,7 @@ import Button from '../components/common/Button';
 /**
  * BudgetPage - View layer displaying summary, alerts, grid of cards, and modals
  */
-export default function BudgetPage() {
+export default function BudgetPage({ onNavigateToPage }) {
   const {
     loading,
     error,
@@ -76,12 +77,15 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-neutral-border shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-primary-light text-primary">
+    <>
+      <Navbar activePage="budget" onNavigateToPage={onNavigateToPage} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+        <div className="space-y-6 animate-fadeIn pb-12">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-neutral-border shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-2xl bg-primary-light text-primary">
               <PieChart className="w-6 h-6" />
             </div>
             <div>
@@ -189,7 +193,7 @@ export default function BudgetPage() {
               icon={Plus}
               className="mt-6"
             >
-              Thiết lập hạn mức ngay
+              Thiết lập hạn mức
             </Button>
           </div>
         )}
@@ -215,6 +219,8 @@ export default function BudgetPage() {
         confirmLabel="Xóa hạn mức"
         loading={deleteLoading}
       />
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

@@ -3,28 +3,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveCo
 import { PieChart as PieChartIcon, BarChart2, Plus, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/formatCurrency';
-
-const ICON_EMOJI = {
-  Tag: '🏷️', UtensilsCrossed: '🍽️', Home: '🏠', BookOpen: '📚',
-  Bus: '🚌', Gamepad2: '🎮', ShoppingBag: '🛍️', Heart: '💊',
-  Users: '👨‍👩‍👧', Briefcase: '💼', GraduationCap: '🎓', Gift: '🎁',
-  MoreHorizontal: '⋯', Coffee: '☕', Car: '🚗', Music: '🎵'
-};
-
-/**
- * Robust Category Emoji Helper - Fixes 'Ă' or broken encoding bugs
- */
-function getCategoryEmoji(iconStr) {
-  if (!iconStr) return '🏷️';
-  if (ICON_EMOJI[iconStr]) return ICON_EMOJI[iconStr];
-  // If the string itself is already an emoji or non-ASCII symbol, verify length/format
-  if (iconStr.length <= 4 && !/^[a-zA-Z0-9]+$/.test(iconStr)) {
-    // If it is 'Ă' or invalid single character encoding glitch from early seed, fallback
-    if (iconStr === 'Ă' || iconStr === '?' || iconStr === '') return '🏷️';
-    return iconStr;
-  }
-  return '🏷️';
-}
+import { getCategoryEmoji } from '../../utils/emoji';
 
 const BreakdownTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -116,18 +95,43 @@ export default function AnalyticsPanel({
   // ---------------------------------------------------------------------------
   // Tab 1: Breakdown Calculations
   // ---------------------------------------------------------------------------
+  // Calculate total expense first
   const totalBreakdownExpense = categoryBreakdown.reduce(
     (sum, item) => sum + Number(item.total_amount || 0),
     0
   );
 
-  const formattedBreakdown = categoryBreakdown.map(item => ({
+  // Sort by amount descending
+  const sortedBreakdown = [...categoryBreakdown].sort(
+    (a, b) => Number(b.total_amount || 0) - Number(a.total_amount || 0)
+  );
+
+  // Take top 10 categories
+  const top10 = sortedBreakdown.slice(0, 10);
+  const others = sortedBreakdown.slice(10);
+
+  // Group others into a single category if they exist
+  let finalBreakdown = [...top10];
+  if (others.length > 0) {
+    const othersTotal = others.reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
+    finalBreakdown.push({
+      category_name: 'Khác',
+      category_icon: '📦',
+      category_color: '#cbd5e1', // A neutral grey color for "Others"
+      total_amount: othersTotal
+    });
+  }
+
+  const fallbackColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+
+  const formattedBreakdown = finalBreakdown.map((item, index) => ({
     ...item,
+    category_color: item.category_color || fallbackColors[index % fallbackColors.length],
     total_amount: Number(item.total_amount),
     percent: totalBreakdownExpense > 0
       ? Math.round((Number(item.total_amount) / totalBreakdownExpense) * 100)
       : 0
-  }));
+  })).filter(item => item.total_amount > 0); // Only keep items with > 0 amount
 
   const hasBreakdownData = formattedBreakdown.length > 0 && totalBreakdownExpense > 0;
 
@@ -246,14 +250,14 @@ export default function AnalyticsPanel({
                       cy="50%"
                       innerRadius={65}
                       outerRadius={95}
-                      paddingAngle={3}
+                      paddingAngle={1}
+                      minAngle={8}
                     >
                       {formattedBreakdown.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={entry.category_color || 'var(--color-primary)'}
-                          stroke="var(--color-neutral-bg)"
-                          strokeWidth={2}
+                          fill={entry.category_color}
+                          stroke="none"
                         />
                       ))}
                     </Pie>

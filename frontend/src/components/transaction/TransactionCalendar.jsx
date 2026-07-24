@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatShortCurrency } from '../../utils/formatCurrency';
-import { Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronRight, Flame } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const WEEK_DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
@@ -29,6 +30,9 @@ export default function TransactionCalendar({ month, groupedByDate, onSelectDay 
   for (let i = 0; i < startDayOffset; i++) {
     daysArray.push({ type: 'empty', key: `empty-${i}` });
   }
+  
+  let localStreak = 0;
+  
   // Days of month
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -41,6 +45,12 @@ export default function TransactionCalendar({ month, groupedByDate, onSelectDay 
       if (t.type === 'income') dayIncome += Number(t.amount);
     });
 
+    if (dayTransactions.length > 0) {
+      localStreak++;
+    } else {
+      localStreak = 0;
+    }
+
     daysArray.push({
       type: 'day',
       key: dateStr,
@@ -49,12 +59,20 @@ export default function TransactionCalendar({ month, groupedByDate, onSelectDay 
       transactions: dayTransactions,
       dayExpense,
       dayIncome,
-      isToday: dateStr === todayStr
+      isToday: dateStr === todayStr,
+      hasTx: dayTransactions.length > 0,
+      streakCount: dayTransactions.length > 0 ? localStreak : 0
     });
   }
 
+  // Blank cells after last day to complete the grid (multiple of 7)
+  const remainingCells = (7 - (daysArray.length % 7)) % 7;
+  for (let i = 0; i < remainingCells; i++) {
+    daysArray.push({ type: 'empty', key: `empty-end-${i}` });
+  }
+
   return (
-    <div className="bg-white rounded-2xl border border-neutral-border shadow-sm overflow-hidden animate-fadeIn">
+    <div className="overflow-hidden animate-fadeIn">
       {/* Calendar Header */}
       <div className="px-6 py-4 bg-neutral-bg/60 border-b border-neutral-border flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -82,19 +100,42 @@ export default function TransactionCalendar({ month, groupedByDate, onSelectDay 
             return <div key={item.key} className="min-h-[105px] sm:min-h-[120px] bg-neutral-bg/20" />;
           }
 
-          const hasTx = item.transactions.length > 0;
+          const hasTx = item.hasTx;
+          
+          const handleDayClick = () => {
+            const today = new Date();
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() - 3);
+            minDate.setHours(0, 0, 0, 0);
+            
+            const maxDate = new Date(today);
+            maxDate.setDate(today.getDate() + 7);
+            maxDate.setHours(23, 59, 59, 999);
+            
+            const selectedDate = new Date(item.dateStr);
+            selectedDate.setHours(12, 0, 0, 0);
+            
+            const isValidDate = selectedDate >= minDate && selectedDate <= maxDate;
+            
+            if (!isValidDate && !hasTx) {
+              toast.error('Chỉ được phép ghi chép trong khoảng 3 ngày trước và 7 ngày sau!');
+              return;
+            }
+            
+            onSelectDay({ dateStr: item.dateStr, transactions: item.transactions, isValidDate });
+          };
 
           return (
             <div
               key={item.key}
-              onClick={() => onSelectDay({ dateStr: item.dateStr, transactions: item.transactions })}
-              className={`min-h-[105px] sm:min-h-[120px] p-2 flex flex-col justify-between transition-all cursor-pointer group ${
+              onClick={handleDayClick}
+              className={`min-h-[105px] sm:min-h-[120px] p-2 flex flex-col justify-between transition-all cursor-pointer group relative ${
                 item.isToday
                   ? 'bg-primary/5 ring-1 ring-inset ring-primary/40'
                   : 'hover:bg-neutral-bg/60'
               }`}
             >
-              {/* Top inside day: Date number + Count dot */}
+              {/* Top inside day: Date number + Streak/Count dot */}
               <div className="flex items-center justify-between">
                 <span
                   className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-110 ${
@@ -106,11 +147,15 @@ export default function TransactionCalendar({ month, groupedByDate, onSelectDay 
                   {item.dayNumber}
                 </span>
 
-                {hasTx && (
+                {hasTx && item.streakCount > 0 ? (
+                  <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-200 flex items-center gap-0.5 shadow-sm">
+                    {item.streakCount} <Flame className="w-3 h-3 fill-orange-500" />
+                  </span>
+                ) : hasTx ? (
                   <span className="text-[10px] font-semibold text-neutral-subtext bg-neutral-bg px-1.5 py-0.5 rounded-md border border-neutral-border">
                     {item.transactions.length} khoản
                   </span>
-                )}
+                ) : null}
               </div>
 
               {/* Bottom inside day: Expense & Income badges */}

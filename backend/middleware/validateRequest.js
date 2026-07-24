@@ -17,14 +17,15 @@ const registerValidationRules = [
   check('fullName')
     .trim()
     .notEmpty().withMessage('Họ tên không được để trống')
-    .isLength({ min: 2, max: 100 }).withMessage('Họ tên phải từ 2 đến 100 ký tự'),
+    .isLength({ min: 2, max: 50 }).withMessage('Họ tên phải từ 2 đến 50 ký tự')
+    .matches(/^[a-zA-ZÀ-ỹ\s]+$/).withMessage('Họ tên chỉ được chứa chữ cái và khoảng trắng'),
   check('email')
     .trim()
     .notEmpty().withMessage('Email không được để trống')
     .isEmail().withMessage('Email không đúng định dạng'),
   check('password')
     .notEmpty().withMessage('Mật khẩu không được để trống')
-    .isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+    .isLength({ min: 6, max: 30 }).withMessage('Mật khẩu phải từ 6 đến 30 ký tự'),
   handleValidationErrors
 ];
 

@@ -10,7 +10,8 @@ const chatController = require('../controllers/chat.controller');
 const chatShortRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes window
   max: 15, // max 15 messages per 15 minutes
-  keyGenerator: (req) => req.user ? String(req.user.id) : req.ip,
+  keyGenerator: (req) => String(req.user.id),
+  validate: false,
   message: {
     success: false,
     message: 'Bạn đã trò chuyện quá nhanh (vượt ngưỡng 15 tin/15 phút). Để bảo vệ hạn mức AI miễn phí, vui lòng nghỉ tay vài phút rồi trò chuyện tiếp nhé!'
@@ -20,7 +21,8 @@ const chatShortRateLimiter = rateLimit({
 const chatDailyRateLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000, // 24 hours window
   max: 40, // max 40 messages per day
-  keyGenerator: (req) => req.user ? String(req.user.id) : req.ip,
+  keyGenerator: (req) => String(req.user.id),
+  validate: false,
   message: {
     success: false,
     message: 'Bạn đã đạt giới hạn 40 tin nhắn AI trong ngày hôm nay. Vui lòng quay lại vào ngày mai nhé!'
@@ -36,5 +38,24 @@ router.delete('/history', chatController.clearHistory);
 // POST /api/chat/advisor - Send message to AI (Protected by BOTH rate limiters)
 // Note: verifyToken is mounted before these routes in server.js so req.user exists before keyGenerator runs!
 router.post('/advisor', chatShortRateLimiter, chatDailyRateLimiter, chatController.sendMessage);
+
+// [Điểm 5] Rate limit riêng cho endpoint ghi dữ liệu thật (tạo giao dịch từ chat)
+// Tách khỏi /advisor vì endpoint này thực sự ghi DB — cần rào riêng, thoải mái hơn nhưng vẫn có giới hạn.
+const confirmActionRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 giờ
+  max: 100, // max 100 giao dịch/giờ qua chat
+  keyGenerator: (req) => String(req.user.id),
+  validate: false,
+  message: {
+    success: false,
+    message: 'Bạn đã tạo quá nhiều giao dịch qua chat trong 1 giờ (giới hạn 100). Vui lòng thử lại sau!'
+  }
+});
+
+// POST /api/chat/confirm-action - Confirm an AI-proposed action (Tool Use)
+router.post('/confirm-action', confirmActionRateLimiter, chatController.confirmAction);
+
+// V2: Confirm budget setup from AI Chat
+router.post('/confirm-budget', confirmActionRateLimiter, chatController.confirmBudget);
 
 module.exports = router;

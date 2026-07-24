@@ -1,7 +1,10 @@
 import React from 'react';
 import { Search, Calendar as CalendarIcon, List, Filter, X } from 'lucide-react';
+import MonthPicker from '../common/MonthPicker';
 
-export default function TransactionFilter({ filters, setFilters, viewMode, setViewMode, categories = [] }) {
+import StreakBadge from './StreakBadge';
+
+export default function TransactionFilter({ filters, setFilters, viewMode, setViewMode, categories = [], streakData, streakLoading }) {
   const handleTypeChange = (type) => {
     setFilters(prev => ({ ...prev, type, categoryId: '' }));
   };
@@ -12,18 +15,19 @@ export default function TransactionFilter({ filters, setFilters, viewMode, setVi
   });
 
   return (
-    <div className="bg-white p-4 rounded-2xl border border-neutral-border shadow-sm space-y-4">
-      {/* Top row: Month + View Mode Switcher */}
+    <div className="p-4 space-y-4">
+      {/* Top row: Month + Streak + View Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-border pb-3">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold text-neutral-maintext">Tháng:</span>
-          <input
-            type="month"
-            value={filters.month}
-            onChange={(e) => setFilters(prev => ({ ...prev, month: e.target.value }))}
-            className="text-sm font-medium bg-neutral-bg border border-neutral-border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-primary" />
+            <MonthPicker
+              value={filters.month}
+              onChange={(val) => setFilters(prev => ({ ...prev, month: val }))}
+              className="text-sm font-medium bg-neutral-bg border border-neutral-border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all whitespace-nowrap"
+            />
+          </div>
+          <StreakBadge streakData={streakData} loading={streakLoading} />
         </div>
 
         {/* View mode switcher */}
