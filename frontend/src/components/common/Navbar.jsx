@@ -88,11 +88,11 @@ export default function Navbar() {
                     </span>
                   )}
                 </div>
-                <div className="hidden sm:block text-left max-w-[130px] md:max-w-[180px]">
+                <div className="block text-left max-w-[120px] sm:max-w-[130px] md:max-w-[180px]">
                   <p className="text-sm font-semibold text-neutral-maintext truncate" title={user?.fullName}>
                     {user?.fullName}
                   </p>
-                  <p className="text-xs text-neutral-subtext truncate" title={user?.email}>
+                  <p className="text-[10px] sm:text-xs text-neutral-subtext truncate" title={user?.email}>
                     {user?.email}
                   </p>
                 </div>
