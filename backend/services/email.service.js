@@ -1,19 +1,33 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
-// Setup transporter using Gmail SMTP with robust settings for cloud deployment
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // use SSL
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 15000, // 15 seconds
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
-});
+let transporter = null;
+
+async function getTransporter() {
+  if (transporter) return transporter;
+  
+  // Dynamically resolve IPv4 address of Gmail to completely bypass IPv6 routing issues on Render
+  const ips = await dns.promises.resolve4('smtp.gmail.com');
+  const ipv4Address = ips[0];
+
+  transporter = nodemailer.createTransport({
+    host: ipv4Address,
+    port: 465,
+    secure: true, // use SSL
+    tls: {
+      servername: 'smtp.gmail.com' // Crucial: Verify SSL cert against the domain, not the IP
+    },
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000,
+  });
+  
+  return transporter;
+}
 
 /**
  * Sends an OTP email to the user.
@@ -67,7 +81,8 @@ async function sendOTP(toEmail, otpCode, purpose) {
     html: htmlContent
   };
 
-  await transporter.sendMail(mailOptions);
+  const t = await getTransporter();
+  await t.sendMail(mailOptions);
 }
 
 module.exports = {
