@@ -160,7 +160,8 @@ export default function LoginPage({ initialMode = 'login' }) {
     setLoading(true);
     try {
       await register(formData.fullName, formData.email, formData.password);
-      setAuthMode('verify_otp');
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
+      switchMode('login');
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Đăng ký thất bại';
       toast.error(msg);
@@ -218,7 +219,8 @@ export default function LoginPage({ initialMode = 'login' }) {
     setLoading(true);
     try {
       await forgotPassword(formData.email);
-      setAuthMode('forgot_otp');
+      setFormData(prev => ({ ...prev, currentOtp: '000000' }));
+      setAuthMode('reset_password');
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Yêu cầu thất bại';
       toast.error(msg);

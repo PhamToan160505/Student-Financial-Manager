@@ -53,19 +53,12 @@ async function register(req, res, next) {
       passwordHash
     });
 
-    // 4. Generate OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
-    const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-    await userModel.updateOtp(email, otpHash, expiresAt, 'register');
-
-    // 5. Send Email
-    await sendOTP(email, otpCode, 'register');
+    // Temporary Bypass OTP: Verify immediately
+    await userModel.verifyEmail(email);
 
     return sendSuccess(res, {
       email
-    }, 'Đăng ký thành công! Vui lòng kiểm tra email để nhận mã OTP xác thực.', 201);
+    }, 'Đăng ký thành công!', 201);
   } catch (err) {
     next(err);
   }
@@ -87,23 +80,7 @@ async function login(req, res, next) {
       return sendError(res, 'Sai email hoặc mật khẩu', 401);
     }
 
-    // Verify email check
-    if (!user.email_verified) {
-      // User is not verified, require OTP verification
-      // Generate new OTP and send it
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-      await userModel.updateOtp(email, otpHash, expiresAt, 'register');
-      await sendOTP(email, otpCode, 'register');
-
-      return res.status(403).json({
-        success: false,
-        message: 'Tài khoản chưa được xác thực. Mã OTP mới đã được gửi đến email.',
-        requireOtp: true,
-        email: email
-      });
-    }
+    // Temporary Bypass OTP: Remove email_verified check so old unverified users can also login
 
     // 3. Generate stateless JWT token (Access Token, expires in 15m)
     const tokenPayload = {
@@ -392,15 +369,17 @@ async function forgotPassword(req, res, next) {
     const user = await userModel.findByEmail(email);
     // Don't leak if email exists or not for security, but we do need to generate OTP if exists
     if (user) {
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      // Temporary Bypass OTP: Set a fixed OTP '000000' and don't send email
+      const otpCode = '000000';
       const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
       await userModel.updateOtp(email, otpHash, expiresAt, 'reset_password');
-      await sendOTP(email, otpCode, 'reset_password');
+      // await sendOTP(email, otpCode, 'reset_password');
     }
 
-    return sendSuccess(res, null, 'Nếu email hợp lệ, hệ thống sẽ gửi một mã OTP khôi phục mật khẩu. Vui lòng kiểm tra hộp thư.');
+    // Always return success
+    return sendSuccess(res, null, 'Đã bỏ qua OTP, vui lòng đặt mật khẩu mới.');
   } catch (err) {
     next(err);
   }
