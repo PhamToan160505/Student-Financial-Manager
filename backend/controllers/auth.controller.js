@@ -87,7 +87,8 @@ async function login(req, res, next) {
       return sendError(res, 'Sai email hoặc mật khẩu', 401);
     }
 
-    // Verify email check
+    // Verify email check bypassed for personal use
+    /* 
     if (!user.email_verified) {
       // User is not verified, require OTP verification
       // Generate new OTP and send it
@@ -99,10 +100,12 @@ async function login(req, res, next) {
 
       return res.status(403).json({
         success: false,
-        requires_verification: true,
-        message: 'Tài khoản chưa xác thực email. Một mã OTP mới đã được gửi đến email của bạn.'
+        message: 'Tài khoản chưa được xác thực. Mã OTP mới đã được gửi đến email.',
+        requireOtp: true,
+        email: email
       });
     }
+    */
 
     // 3. Generate stateless JWT token (Access Token, expires in 15m)
     const tokenPayload = {
