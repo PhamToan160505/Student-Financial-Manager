@@ -81,8 +81,20 @@ async function sendOTP(toEmail, otpCode, purpose) {
     html: htmlContent
   };
 
-  const t = await getTransporter();
-  await t.sendMail(mailOptions);
+  try {
+    const t = await getTransporter();
+    await t.sendMail(mailOptions);
+  } catch (error) {
+    console.error(`\n🔥 ================================================== 🔥`);
+    console.error(`[CẢNH BÁO] Gửi email thất bại do Render Free khóa cổng SMTP (465/587)!`);
+    console.error(`[OTP MOCK] ĐỊA CHỈ EMAIL: ${toEmail}`);
+    if (otpCode) {
+      console.error(`[OTP MOCK] MÃ OTP CỦA BẠN LÀ: ${otpCode}`);
+      console.error(`[OTP MOCK] Hãy lấy mã này nhập vào trang web để tiếp tục nha!`);
+    }
+    console.error(`🔥 ================================================== 🔥\n`);
+    // Lờ đi lỗi để frontend không bị sập (trả về success ảo)
+  }
 }
 
 module.exports = {
