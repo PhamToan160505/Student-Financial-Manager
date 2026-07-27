@@ -53,8 +53,7 @@ async function register(req, res, next) {
       passwordHash
     });
 
-    // 4. Generate OTP (bypassed for personal use)
-    /*
+    // 4. Generate OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
     const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
@@ -63,11 +62,10 @@ async function register(req, res, next) {
 
     // 5. Send Email
     await sendOTP(email, otpCode, 'register');
-    */
 
     return sendSuccess(res, {
       email
-    }, 'Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.', 201);
+    }, 'Đăng ký thành công! Vui lòng kiểm tra email để nhận mã OTP xác thực.', 201);
   } catch (err) {
     next(err);
   }
@@ -89,8 +87,7 @@ async function login(req, res, next) {
       return sendError(res, 'Sai email hoặc mật khẩu', 401);
     }
 
-    // Verify email check bypassed for personal use
-    /* 
+    // Verify email check
     if (!user.email_verified) {
       // User is not verified, require OTP verification
       // Generate new OTP and send it
@@ -107,7 +104,6 @@ async function login(req, res, next) {
         email: email
       });
     }
-    */
 
     // 3. Generate stateless JWT token (Access Token, expires in 15m)
     const tokenPayload = {
