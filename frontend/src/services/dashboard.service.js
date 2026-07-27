@@ -13,8 +13,8 @@ const dashboardService = {
   getInsight(month) {
     return api.get('/dashboard/insight', { params: { month } });
   },
-  getAvailableBalance() {
-    return api.get('/dashboard/available-balance');
+  getAvailableBalance(month) {
+    return api.get('/dashboard/available-balance', { params: { month } });
   }
 };
 

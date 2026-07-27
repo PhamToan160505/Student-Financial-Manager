@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../controllers/useAuth';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
@@ -36,16 +36,19 @@ export default function LoginPage() {
   
   // 'login', 'register', 'verify_otp', 'forgot_email', 'forgot_otp', 'reset_password'
   const [authMode, setAuthMode] = useState('login');
-  
   const [loading, setLoading] = useState(false);
   const savedEmail = localStorage.getItem('rememberedEmail') || '';
-  const savedPassword = localStorage.getItem('rememberedPassword') || '';
   const [rememberMe, setRememberMe] = useState(!!savedEmail);
   
+  useEffect(() => {
+    // Purge any legacy stored raw password credential from localStorage
+    localStorage.removeItem('rememberedPassword');
+  }, []);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: savedEmail,
-    password: savedPassword,
+    password: '',
     confirmPassword: ''
   });
 
@@ -110,15 +113,14 @@ export default function LoginPage() {
     if (rememberMe) {
       try {
         localStorage.setItem('rememberedEmail', formData.email);
-        localStorage.setItem('rememberedPassword', formData.password);
         await rememberDevice();
       } catch (err) {
         toast.error('Lỗi khi lưu phiên đăng nhập');
       }
     } else {
       localStorage.removeItem('rememberedEmail');
-      localStorage.removeItem('rememberedPassword');
     }
+    localStorage.removeItem('rememberedPassword');
     completeLogin(res.data.token, res.data.user);
   };
 

@@ -136,7 +136,8 @@ async function getInsight(req, res, next) {
 async function getAvailableBalance(req, res, next) {
   try {
     const userId = req.user.id;
-    const balanceData = await balanceService.getAvailableBalance(userId);
+    const { month } = req.query;
+    const balanceData = await balanceService.getAvailableBalance(userId, month);
     return sendSuccess(res, balanceData, 'Lấy số dư khả dụng thành công');
   } catch (err) {
     next(err);

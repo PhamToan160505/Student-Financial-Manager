@@ -32,8 +32,10 @@ const ICON_OPTIONS = [
   { name: 'Umbrella', label: '☂️' }
 ];
 
-export default function JarModal({ isOpen, onClose, onSubmit, initialData = null }) {
+export default function JarModal({ isOpen, onClose, onSubmit, initialData = null, existingJars = [] }) {
   const isEditing = !!initialData;
+
+  const [isDuplicateName, setIsDuplicateName] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -69,6 +71,7 @@ export default function JarModal({ isOpen, onClose, onSubmit, initialData = null
       } else {
         setForm({ name: '', targetAmount: '', targetDate: '', displayTargetDate: '', icon: 'PiggyBank', color: '#2563EB' });
       }
+      setIsDuplicateName(false);
     }
   }, [isOpen, initialData]);
 
@@ -134,6 +137,13 @@ export default function JarModal({ isOpen, onClose, onSubmit, initialData = null
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
+    }
+
+    if (!isEditing) {
+      const duplicate = existingJars.some(j => j.name.trim().toLowerCase() === nameVal.toLowerCase());
+      setIsDuplicateName(duplicate);
+    } else {
+      setIsDuplicateName(false);
     }
 
     setShowConfirm(true);
@@ -288,9 +298,16 @@ export default function JarModal({ isOpen, onClose, onSubmit, initialData = null
     
     <Modal isOpen={showConfirm} onClose={() => setShowConfirm(false)} title="Xác nhận" size="sm">
       <div className="space-y-6 pt-2">
-        <p className="text-neutral-maintext">
-          Bạn có chắc chắn muốn {isEditing ? 'cập nhật' : 'tạo'} hũ tiết kiệm <strong>{form.name}</strong> với mục tiêu <strong>{form.targetAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ</strong> không?
-        </p>
+        {isDuplicateName ? (
+          <div className="text-warning-darker bg-warning-light/50 p-4 rounded-xl border border-warning/30 font-medium leading-relaxed">
+            <span className="block mb-2">⚠️ <strong>Hũ "{form.name}" đã có rồi!</strong></span>
+            Bạn có muốn tạo tiếp một hũ mới trùng tên không?
+          </div>
+        ) : (
+          <p className="text-neutral-maintext leading-relaxed">
+            Bạn có chắc chắn muốn {isEditing ? 'cập nhật' : 'tạo'} hũ tiết kiệm <strong>{form.name}</strong> với mục tiêu <strong>{form.targetAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ</strong> không?
+          </p>
+        )}
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => setShowConfirm(false)} className="flex-1">Hủy</Button>
           <Button variant="primary" onClick={executeSubmit} loading={loading} className="flex-1">Đồng ý</Button>

@@ -63,27 +63,32 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
     <div className="space-y-4">
       {/* 0. Banner Tài sản hiện có (Lũy kế toàn thời gian) */}
       {availableBalanceData && (
-        <div className="bg-gradient-to-r from-primary to-primary-light p-5 rounded-2xl border border-primary/20 shadow-md text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm shrink-0">
-              <Wallet className="w-8 h-8 text-white" />
+        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-neutral-bg border border-blue-100/80 p-3.5 md:p-4 rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 shrink-0 shadow-sm">
+              <Wallet className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-semibold opacity-90 tracking-wide uppercase">Tài Sản Hiện Có</p>
-              <p className="text-xs opacity-75 mt-0.5 mb-1">(Lũy kế từ khi bắt đầu dùng app)</p>
-              <p className="text-3xl font-bold tabular-nums">
+              <p className="text-[11px] font-bold text-primary tracking-wider uppercase">SỐ DƯ KHẢ DỤNG</p>
+              <p className="text-[11px] text-neutral-subtext mt-0.5 mb-1 font-medium">(Tiền rảnh rỗi chưa phân bổ)</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-primary">
                 {availableBalanceData.available_balance >= 0 ? `+` : ''}{formatCurrency(availableBalanceData.available_balance)}
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-2 bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/10 text-sm">
+
+          <div className="w-full md:w-auto flex flex-col gap-2 bg-white/90 p-2.5 px-3.5 rounded-xl border border-neutral-border shadow-sm text-xs min-w-[260px]">
             <div className="flex items-center justify-between gap-4">
-              <span className="opacity-80">Tổng số dư thực tế:</span>
-              <span className="font-bold">{formatCurrency(availableBalanceData.total_actual_balance)}</span>
+              <span className="text-neutral-subtext font-medium">Tổng số dư thực tế:</span>
+              <span className="font-extrabold text-neutral-maintext">{formatCurrency(availableBalanceData.total_actual_balance)}</span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="opacity-80">Đang khóa trong hũ:</span>
-              <span className="font-bold text-red-200">-{formatCurrency(availableBalanceData.total_locked_in_jars)}</span>
+            <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-neutral-border/60">
+              <span className="text-neutral-subtext font-medium">Đang khóa trong hũ:</span>
+              <span className="font-extrabold text-danger">{formatCurrency(availableBalanceData.total_locked_in_jars)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-neutral-border/60">
+              <span className="text-neutral-subtext font-medium">Ngân sách chưa tiêu:</span>
+              <span className="font-extrabold text-warning-darker">{formatCurrency(availableBalanceData.total_remaining_budgets)}</span>
             </div>
           </div>
         </div>
@@ -140,31 +145,27 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
         </p>
       </div>
 
-      {/* 4. Savings Rate */}
+      {/* 4. Tổng Tiền Trong Hũ */}
       <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
         <div>
           <div className="flex items-start justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tỷ Lệ Tiết Kiệm</p>
+            <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Tiền Trong Hũ</p>
             <div className="p-2 bg-primary-light rounded-xl text-primary shrink-0">
               <PiggyBank className="w-5 h-5" />
             </div>
           </div>
-          {savingsRate === null || savingsRate === undefined ? (
-            <p className="text-base font-bold text-neutral-subtext">Chưa có dữ liệu</p>
-          ) : (
-            <p className={`text-xl font-bold tabular-nums truncate ${savingsRate >= 20 ? 'text-primary' : savingsRate >= 0 ? 'text-success' : 'text-danger'}`} title={`${savingsRate}%`}>
-              {savingsRate}%
+          {availableBalanceData ? (
+            <p className="text-xl font-bold text-primary tabular-nums truncate" title={formatCurrency(availableBalanceData.total_locked_in_jars)}>
+              {formatCurrency(availableBalanceData.total_locked_in_jars)}
             </p>
+          ) : (
+            <p className="text-base font-bold text-neutral-subtext">Đang tải...</p>
           )}
         </div>
         <p className="text-[11px] text-neutral-subtext mt-3 font-medium">
-          {savingsRate === null || savingsRate === undefined
-            ? 'Cần ghi nhận thu nhập để tính'
-            : savingsRate >= 20
-            ? '🎯 Đạt mục tiêu tiết kiệm chuẩn (>20%)'
-            : '💡 Tiết kiệm = (Thu - Chi) / Thu'}
+          🔒 Số tiền đang được khóa an toàn
         </p>
-    </div>
+      </div>
     </div>
     </div>
   );

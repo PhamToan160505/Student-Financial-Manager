@@ -11,18 +11,21 @@ import {
   Plus, Tag, PieChart, ArrowLeftRight, ShieldCheck
 } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
+
 /**
  * StyleguidePage - Design System & UI/UX Audit Verification Hub
  * Showcases unified color tokens, high-contrast WCAG AA badges, component library, and copy dictionary.
  */
-export default function StyleguidePage({ onNavigateToPage }) {
+export default function StyleguidePage() {
+  const navigate = useNavigate();
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [sampleInput, setSampleInput] = useState('450000');
 
   return (
-    <>
-      <Navbar activePage="styleguide" onNavigateToPage={onNavigateToPage} />
+    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+      <Navbar />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 md:pb-12 space-y-10 animate-fadeIn">
         
         {/* Header */}
@@ -43,7 +46,7 @@ export default function StyleguidePage({ onNavigateToPage }) {
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => onNavigateToPage?.('dashboard')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
             Trở về Dashboard
           </Button>
         </div>
@@ -234,6 +237,6 @@ export default function StyleguidePage({ onNavigateToPage }) {
         />
 
       </main>
-    </>
+    </div>
   );
 }

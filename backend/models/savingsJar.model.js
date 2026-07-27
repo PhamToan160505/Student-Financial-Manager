@@ -78,11 +78,20 @@ async function remove(id, userId) {
   return result.affectedRows > 0;
 }
 
-async function getTotalLockedAmount(userId) {
-  const [rows] = await pool.query(
-    "SELECT COALESCE(SUM(current_amount), 0) AS total_locked FROM savings_jars WHERE user_id = ? AND status = 'active'",
-    [userId]
-  );
+async function getTotalLockedAmount(userId, upToMonth) {
+  let query = `
+    SELECT COALESCE(SUM(CASE WHEN type = 'deposit' THEN amount ELSE -amount END), 0) AS total_locked
+    FROM jar_transactions
+    WHERE user_id = ?
+  `;
+  const params = [userId];
+
+  if (upToMonth && /^\d{4}-\d{2}$/.test(upToMonth)) {
+    query += ` AND DATE_FORMAT(created_at, '%Y-%m') <= ?`;
+    params.push(upToMonth);
+  }
+
+  const [rows] = await pool.query(query, params);
   return Number(rows[0].total_locked || 0);
 }
 

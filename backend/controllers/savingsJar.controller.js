@@ -36,11 +36,13 @@ async function getAllJars(req, res, next) {
 
         if (monthsLeft >= 2) {
           hasTargetDate = true;
-          const missingAmount = Number(jar.target_amount) - Number(jar.current_amount);
+          monthlyDeposited = await jarTransactionModel.getMonthlyDepositForJar(jar.id, currentMonthStr);
           
-          if (missingAmount > 0) {
-            monthlyTarget = Math.ceil(missingAmount / monthsLeft);
-            monthlyDeposited = await jarTransactionModel.getMonthlyDepositForJar(jar.id, currentMonthStr);
+          // Tính số tiền còn thiếu dựa trên số dư đầu tháng (để target không bị giảm dần khi nạp tiền trong tháng)
+          const missingAmountAtStartOfMonth = Number(jar.target_amount) - Number(jar.current_amount) + monthlyDeposited;
+          
+          if (missingAmountAtStartOfMonth > 0) {
+            monthlyTarget = Math.ceil(missingAmountAtStartOfMonth / monthsLeft);
             monthlyMissing = monthlyTarget - monthlyDeposited;
             
             if (monthlyMissing > 0) {
@@ -108,10 +110,13 @@ async function updateJar(req, res, next) {
 
     let newStatus = status || jar.status;
     
-    // Nếu update targetAmount mà currentAmount >= targetAmount thì auto complete
     if (targetAmount !== undefined) {
-      if (Number(jar.current_amount) >= Number(targetAmount) && newStatus === 'active') {
+      const target = Number(targetAmount);
+      const current = Number(jar.current_amount);
+      if (current >= target && newStatus === 'active') {
         newStatus = 'completed';
+      } else if (current < target && newStatus === 'completed') {
+        newStatus = 'active';
       }
     }
 
@@ -150,7 +155,7 @@ async function deposit(req, res, next) {
     const { amount, note } = req.body;
     const userId = req.user.id;
 
-    if (!amount || amount <= 0) return sendError(res, 'Số tiền gửi phải lớn hơn 0', 400);
+    if (!amount || amount < 10000) return sendError(res, 'Số tiền giao dịch phải từ 10.000đ trở lên', 400);
 
     const jar = await savingsJarModel.findByIdAndUserId(id, userId);
     if (!jar) return sendError(res, 'Không tìm thấy hũ', 404);
@@ -187,7 +192,7 @@ async function withdraw(req, res, next) {
     const { amount, note } = req.body;
     const userId = req.user.id;
 
-    if (!amount || amount <= 0) return sendError(res, 'Số tiền rút phải lớn hơn 0', 400);
+    if (!amount || amount < 10000) return sendError(res, 'Số tiền giao dịch phải từ 10.000đ trở lên', 400);
 
     const jar = await savingsJarModel.findByIdAndUserId(id, userId);
     if (!jar) return sendError(res, 'Không tìm thấy hũ', 404);
@@ -201,9 +206,15 @@ async function withdraw(req, res, next) {
     
     let newAmount = Number(jar.current_amount) - Number(amount);
     
-    await savingsJarModel.update(id, userId, { currentAmount: newAmount });
+    let newStatus = jar.status;
+    // Nếu rút tiền làm số dư nhỏ hơn mục tiêu, và hũ đang hoàn thành, thì chuyển về active (trừ khi nó đang bị archive)
+    if (newAmount < Number(jar.target_amount) && jar.status === 'completed') {
+      newStatus = 'active';
+    }
     
-    return sendSuccess(res, { newAmount }, 'Rút tiền khỏi hũ thành công');
+    await savingsJarModel.update(id, userId, { currentAmount: newAmount, status: newStatus });
+    
+    return sendSuccess(res, { newAmount, status: newStatus }, 'Rút tiền khỏi hũ thành công');
   } catch (error) {
     next(error);
   }

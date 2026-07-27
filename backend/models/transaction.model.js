@@ -120,9 +120,9 @@ async function getSummary({ userId, month }) {
 }
 
 /**
- * Get total sum of transactions by type ('income' or 'expense') for a specific month
+ * Get total sum of transactions by type ('income' or 'expense')
  */
-async function sumByType({ userId, month, type }) {
+async function sumByType({ userId, month, upToMonth, type }) {
   let query = `
     SELECT COALESCE(SUM(amount), 0) AS total
     FROM transactions
@@ -133,6 +133,11 @@ async function sumByType({ userId, month, type }) {
   if (month && /^\d{4}-\d{2}$/.test(month)) {
     query += ` AND DATE_FORMAT(transaction_date, '%Y-%m') = ?`;
     params.push(month);
+  }
+  
+  if (upToMonth && /^\d{4}-\d{2}$/.test(upToMonth)) {
+    query += ` AND DATE_FORMAT(transaction_date, '%Y-%m') <= ?`;
+    params.push(upToMonth);
   }
 
   const [rows] = await pool.query(query, params);

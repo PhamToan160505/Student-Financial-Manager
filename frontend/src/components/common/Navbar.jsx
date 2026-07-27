@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../controllers/useAuth';
 import Button from './Button';
 import ProfileModal from './ProfileModal';
@@ -10,7 +11,7 @@ import {
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, disabled: false },
   { id: 'transactions', label: 'Sổ thu chi', icon: ArrowLeftRight, disabled: false },
-  { id: 'categories', label: 'Danh mục', icon: Tag, disabled: false },
+  { id: 'category', label: 'Danh mục', icon: Tag, disabled: false },
   { id: 'budget', label: 'Ngân sách', icon: PieChart, disabled: false },
   { id: 'savings', label: 'Tiết kiệm', icon: PiggyBank, disabled: false },
 ];
@@ -19,9 +20,12 @@ const NAV_ITEMS = [
  * Shared Navbar Component - Enforces a single unified active tab style (filled pill)
  * across all pages: Dashboard, Transactions, Categories, and Budget.
  */
-export default function Navbar({ activePage, onNavigateToPage }) {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activePage = location.pathname.split('/')[1] || 'dashboard';
 
   return (
     <>
@@ -31,7 +35,7 @@ export default function Navbar({ activePage, onNavigateToPage }) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-2">
             {/* Logo & App Title */}
-            <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => onNavigateToPage && onNavigateToPage('dashboard')}>
+            <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/dashboard')}>
               <div className="p-2 bg-primary rounded-xl text-white shadow-sm shadow-primary/30 shrink-0">
                 <Wallet className="w-5 h-5" />
               </div>
@@ -48,7 +52,7 @@ export default function Navbar({ activePage, onNavigateToPage }) {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => !item.disabled && onNavigateToPage && onNavigateToPage(item.id)}
+                    onClick={() => !item.disabled && navigate(`/${item.id}`)}
                     disabled={item.disabled}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all duration-200 cursor-pointer shrink-0 ${
                       isActive
@@ -120,7 +124,7 @@ export default function Navbar({ activePage, onNavigateToPage }) {
             return (
               <button
                 key={item.id}
-                onClick={() => !item.disabled && onNavigateToPage && onNavigateToPage(item.id)}
+                onClick={() => !item.disabled && navigate(`/${item.id}`)}
                 disabled={item.disabled}
                 className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl text-xs transition-all ${
                   isActive

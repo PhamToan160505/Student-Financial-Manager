@@ -18,7 +18,7 @@ import {
   Plus, ArrowLeftRight, RefreshCw, AlertCircle, Calendar, List, Camera, Sparkles
 } from 'lucide-react';
 
-export default function TransactionsPage({ onNavigateToPage }) {
+export default function TransactionsPage() {
   const {
     transactions,
     summary,
@@ -80,9 +80,9 @@ export default function TransactionsPage({ onNavigateToPage }) {
   const loading = txLoading || catLoading;
 
   return (
-    <>
-      <Navbar activePage="transactions" onNavigateToPage={onNavigateToPage} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         <div className="space-y-6">
           {/* Page Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -241,7 +241,15 @@ export default function TransactionsPage({ onNavigateToPage }) {
         }}
         onSubmit={showCreateModal ? handleCreate : handleEdit}
         initialData={editingTransaction || prefillData}
-        initialDate={prefilledDate}
+        initialDate={
+          (() => {
+            if (editingTransaction) return null;
+            if (prefilledDate) return prefilledDate;
+            const today = new Date();
+            const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            return (filters.month >= currentMonthStr) ? today.toISOString().slice(0, 10) : `${filters.month}-01`;
+          })()
+        }
         categories={categories}
       />
 
@@ -275,6 +283,6 @@ export default function TransactionsPage({ onNavigateToPage }) {
       />
         </div>
       </main>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import api from './services/api';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './controllers/useAuth';
 import LoginPage from './pages/LoginPage';
@@ -8,26 +8,14 @@ import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
 import BudgetPage from './pages/BudgetPage';
 import SavingsJarsPage from './pages/SavingsJarsPage';
-import Button from './components/common/Button';
 import { useChatAdvisor } from './hooks/useChatAdvisor';
 import ChatBubbleButton from './components/chat/ChatBubbleButton';
 import ChatDrawer from './components/chat/ChatDrawer';
-import {
-  Wallet, LogOut, UserCheck, Tag, LayoutDashboard,
-  ArrowLeftRight, PieChart, RefreshCw
-} from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, disabled: false },
-  { id: 'transactions', label: 'Sổ thu chi', icon: ArrowLeftRight, disabled: false },
-  { id: 'categories', label: 'Danh mục', icon: Tag, disabled: false },
-  { id: 'budget', label: 'Ngân sách', icon: PieChart, disabled: false },
-];
-
 function MainAppContent() {
-  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
-  const [activePage, setActivePage] = useState('dashboard');
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const chatAdvisor = useChatAdvisor();
 
   if (authLoading) {
@@ -45,29 +33,25 @@ function MainAppContent() {
     return <LoginPage />;
   }
 
-  const renderPage = () => {
-    switch (activePage) {
-      case 'dashboard': return <DashboardPage onNavigateToPage={setActivePage} />;
-      case 'transactions': return <TransactionsPage onNavigateToPage={setActivePage} />;
-      case 'categories': return <CategoriesPage onNavigateToPage={setActivePage} />;
-      case 'budget': return <BudgetPage onNavigateToPage={setActivePage} />;
-      case 'savings': return <SavingsJarsPage onNavigateToPage={setActivePage} />;
-      default:
-        return (
+  return (
+    <div className="min-h-screen bg-neutral-bg font-sans">
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/transactions" element={<TransactionsPage />} />
+        <Route path="/category" element={<CategoriesPage />} />
+        <Route path="/budget" element={<BudgetPage />} />
+        <Route path="/savings" element={<SavingsJarsPage />} />
+        <Route path="*" element={
           <div className="flex flex-col items-center justify-center py-24 text-neutral-subtext">
             <div className="w-16 h-16 bg-neutral-bg rounded-2xl flex items-center justify-center mb-4 border border-neutral-border">
               <span className="text-2xl">🚧</span>
             </div>
-            <p className="text-base font-semibold text-neutral-maintext">Đang phát triển...</p>
-            <p className="text-sm mt-1">Tính năng này sẽ có trong các bước tiếp theo</p>
+            <p className="text-base font-semibold text-neutral-maintext">Không tìm thấy trang</p>
+            <p className="text-sm mt-1">Đường dẫn không tồn tại</p>
           </div>
-        );
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-neutral-bg font-sans">
-      {renderPage()}
+        } />
+      </Routes>
 
       {/* Global Floating AI Chat Widget */}
       <ChatBubbleButton
@@ -92,9 +76,11 @@ function MainAppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <MainAppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        <MainAppContent />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

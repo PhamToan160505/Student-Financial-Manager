@@ -50,7 +50,7 @@ function CategoryItem({ category, onEdit, onDelete }) {
   );
 }
 
-export default function CategoriesPage({ onNavigateToPage }) {
+export default function CategoriesPage() {
   const { expense, income, loading, error, refetch, createCategory, updateCategory, removeCategory } = useCategories();
 
   const [activeTab, setActiveTab] = useState('expense');
@@ -96,9 +96,10 @@ export default function CategoriesPage({ onNavigateToPage }) {
   });
 
   return (
-    <>
-      <Navbar activePage="categories" onNavigateToPage={onNavigateToPage} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+      <Navbar />
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         <div className="space-y-6">
           {/* Page Header */}
           <div className="flex items-center justify-between">
@@ -247,6 +248,6 @@ export default function CategoriesPage({ onNavigateToPage }) {
       />
         </div>
       </main>
-    </>
+    </div>
   );
 }

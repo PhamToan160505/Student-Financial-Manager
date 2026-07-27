@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Input from '../common/Input';
+import toast from 'react-hot-toast';
+import ConfirmModal from '../common/ConfirmModal';
+import { Info, AlertTriangle } from 'lucide-react';
 
 export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, type, availableBalance }) {
   const [form, setForm] = useState({
@@ -11,6 +14,7 @@ export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, ty
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const isDeposit = type === 'deposit';
 
@@ -19,6 +23,7 @@ export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, ty
       setForm({ amount: '', note: '' });
       setApiError('');
       setFieldErrors({});
+      setShowConfirm(false);
     }
   }, [isOpen]);
 
@@ -27,12 +32,15 @@ export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, ty
     const errors = {};
     const amount = Number(form.amount.toString().replace(/\./g, ''));
     
-    if (!amount || amount <= 0) {
-      errors.amount = 'Vui lòng nhập số tiền hợp lệ';
+    if (!amount || amount < 10000) {
+      errors.amount = 'Số tiền tối thiểu là 10.000đ';
+      toast.error('Số tiền giao dịch tối thiểu là 10.000đ');
     } else if (isDeposit && amount > availableBalance) {
       errors.amount = 'Số tiền gửi vượt quá số dư khả dụng';
+      toast.error('Số tiền gửi vượt quá số dư khả dụng');
     } else if (!isDeposit && amount > Number(jar.current_amount)) {
       errors.amount = 'Số tiền rút vượt quá số dư trong hũ';
+      toast.error('Số tiền rút vượt quá số dư trong hũ');
     }
 
     if (Object.keys(errors).length > 0) {
@@ -40,14 +48,21 @@ export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, ty
       return;
     }
 
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = async () => {
+    const amount = Number(form.amount.toString().replace(/\./g, ''));
     setLoading(true);
     setApiError('');
     setFieldErrors({});
     try {
       await onSubmit(jar.id, { amount, note: form.note });
+      setShowConfirm(false);
       onClose();
     } catch (err) {
       setApiError(err.message || 'Có lỗi xảy ra');
+      setShowConfirm(false);
     } finally {
       setLoading(false);
     }
@@ -115,6 +130,22 @@ export default function JarTransactionModal({ isOpen, onClose, onSubmit, jar, ty
           </Button>
         </div>
       </form>
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirm}
+        title={isDeposit ? 'Xác nhận gửi tiền' : 'Xác nhận rút tiền'}
+        message={
+          isDeposit
+            ? `Bạn có chắc chắn muốn gửi ${Number(form.amount.toString().replace(/\./g, '')).toLocaleString('vi-VN')}đ vào hũ "${jar.name}" không?`
+            : `Bạn có chắc chắn muốn rút ${Number(form.amount.toString().replace(/\./g, '')).toLocaleString('vi-VN')}đ khỏi hũ "${jar.name}" không?`
+        }
+        confirmLabel={isDeposit ? 'Xác nhận gửi' : 'Xác nhận rút'}
+        confirmVariant={isDeposit ? 'primary' : 'danger'}
+        icon={isDeposit ? Info : AlertTriangle}
+        loading={loading}
+      />
     </Modal>
   );
 }

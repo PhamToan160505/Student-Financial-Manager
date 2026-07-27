@@ -34,9 +34,9 @@ async function create({ jarId, userId, type, amount, note }) {
 async function getMonthlyDepositForJar(jarId, monthStr) {
   // monthStr is expected to be 'YYYY-MM'
   const [rows] = await pool.query(
-    `SELECT COALESCE(SUM(amount), 0) AS total 
+    `SELECT COALESCE(SUM(CASE WHEN type = 'deposit' THEN amount ELSE -amount END), 0) AS total 
      FROM jar_transactions 
-     WHERE jar_id = ? AND type = 'deposit' AND DATE_FORMAT(created_at, '%Y-%m') = ?`,
+     WHERE jar_id = ? AND DATE_FORMAT(created_at, '%Y-%m') = ?`,
     [jarId, monthStr]
   );
   return Number(rows[0].total || 0);

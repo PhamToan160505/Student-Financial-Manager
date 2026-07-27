@@ -12,7 +12,7 @@ import Button from '../components/common/Button';
 /**
  * BudgetPage - View layer displaying summary, alerts, grid of cards, and modals
  */
-export default function BudgetPage({ onNavigateToPage }) {
+export default function BudgetPage() {
   const {
     loading,
     error,
@@ -77,9 +77,9 @@ export default function BudgetPage({ onNavigateToPage }) {
   };
 
   return (
-    <>
-      <Navbar activePage="budget" onNavigateToPage={onNavigateToPage} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         <div className="space-y-6 animate-fadeIn pb-12">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-neutral-border shadow-2xs">
@@ -221,6 +221,6 @@ export default function BudgetPage({ onNavigateToPage }) {
       />
         </div>
       </main>
-    </>
+    </div>
   );
 }

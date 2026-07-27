@@ -43,6 +43,9 @@ export default function JarHistoryModal({ isOpen, onClose, jar }) {
           <p className="text-xs text-neutral-subtext mt-0.5">
             Mục tiêu: <span className="font-semibold text-neutral-maintext">{target.toLocaleString('vi-VN')}đ</span>
           </p>
+          <p className="text-[11px] font-medium text-neutral-subtext opacity-80 mt-0.5 whitespace-nowrap truncate">
+            Thời hạn: {new Date(jar.created_at).toLocaleDateString('vi-VN')} — {jar.target_date ? new Date(jar.target_date).toLocaleDateString('vi-VN') : 'Vô thời hạn'}
+          </p>
         </div>
         <div className="text-right shrink-0">
           <p className="text-lg font-bold" style={{ color: jar.color }}>{current.toLocaleString('vi-VN')}đ</p>

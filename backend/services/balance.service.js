@@ -13,13 +13,13 @@ const { getCurrentMonthVN } = require('../utils/timezone');
  * Hai query đi qua cùng bảng transactions nên không thể lệch số.
  */
 async function getAvailableBalance(userId, month = getCurrentMonthVN()) {
-  // 1. Tổng thu và tổng chi (ALL TIME)
-  const totalIncome = await transactionModel.sumByType({ userId, type: 'income' });
-  const totalExpense = await transactionModel.sumByType({ userId, type: 'expense' });
+  // 1. Tổng thu và tổng chi (tính đến HẾT tháng đang xem)
+  const totalIncome = await transactionModel.sumByType({ userId, upToMonth: month, type: 'income' });
+  const totalExpense = await transactionModel.sumByType({ userId, upToMonth: month, type: 'expense' });
   const actualBalance = totalIncome - totalExpense;
 
-  // 2. Tổng tiền đang khóa trong hũ tiết kiệm
-  const totalLockedInJars = await savingsJarModel.getTotalLockedAmount(userId);
+  // 2. Tổng tiền đang khóa trong hũ tiết kiệm (tính đến HẾT tháng đang xem)
+  const totalLockedInJars = await savingsJarModel.getTotalLockedAmount(userId, month);
 
   // 3. Tổng ngân sách còn lại của tháng hiện tại
   const budgets = await budgetModel.getBudgetsByMonth({ userId, month });

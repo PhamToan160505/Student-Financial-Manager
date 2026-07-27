@@ -11,7 +11,7 @@ import JarHistoryModal from '../components/savings/JarHistoryModal';
 import toast from 'react-hot-toast';
 import { Plus, PiggyBank, Target, Archive } from 'lucide-react';
 
-export default function SavingsJarsPage({ onNavigateToPage }) {
+export default function SavingsJarsPage() {
   const { jars, loading, error, fetchJars, createJar, updateJar, deleteJar, deposit, withdraw } = useSavingsJars();
   const { fetchAvailableBalance } = useDashboard();
   const [availableBalance, setAvailableBalance] = useState(0);
@@ -25,6 +25,9 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
   
   const [deletingJar, setDeletingJar] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [archiveModal, setArchiveModal] = useState({ jar: null, targetStatus: null });
+  const [isArchiving, setIsArchiving] = useState(false);
 
   useEffect(() => {
     fetchJars();
@@ -63,6 +66,28 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
       const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra, vui lòng thử lại';
       toast.error(msg);
       throw err;
+    }
+  };
+
+  const handleRequestToggleArchive = (jar, newStatus) => {
+    setArchiveModal({ jar, targetStatus: newStatus });
+  };
+
+  const confirmToggleArchive = async () => {
+    if (!archiveModal.jar || !archiveModal.targetStatus) return;
+    setIsArchiving(true);
+    try {
+      await updateJar(archiveModal.jar.id, { status: archiveModal.targetStatus });
+      toast.success(
+        archiveModal.targetStatus === 'archived'
+          ? `Đã lưu trữ hũ "${archiveModal.jar.name}"!`
+          : `Đã khôi phục hũ "${archiveModal.jar.name}"!`
+      );
+      setArchiveModal({ jar: null, targetStatus: null });
+    } catch (err) {
+      toast.error('Có lỗi xảy ra khi thay đổi trạng thái hũ');
+    } finally {
+      setIsArchiving(false);
     }
   };
 
@@ -107,7 +132,7 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
 
   return (
     <div className="min-h-screen bg-neutral-bg font-sans pb-20">
-      <Navbar activePage="savings" onNavigateToPage={onNavigateToPage} />
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -166,6 +191,7 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
                 onDeposit={(j) => setTxModal({ isOpen: true, type: 'deposit', jar: j })}
                 onWithdraw={(j) => setTxModal({ isOpen: true, type: 'withdraw', jar: j })}
                 onViewHistory={(j) => setHistoryJar(j)}
+                onToggleArchive={handleRequestToggleArchive}
               />
             ))}
           </div>
@@ -184,12 +210,15 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
         )}
       </main>
 
-      <JarModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        initialData={editingJar}
-        onSubmit={handleSaveJar}
-      />
+      {showModal && (
+        <JarModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSaveJar}
+          initialData={editingJar}
+          existingJars={jars}
+        />
+      )}
 
       <JarTransactionModal
         isOpen={txModal.isOpen}
@@ -204,6 +233,24 @@ export default function SavingsJarsPage({ onNavigateToPage }) {
         isOpen={!!historyJar}
         onClose={() => setHistoryJar(null)}
         jar={historyJar}
+      />
+
+      <ConfirmModal
+        isOpen={!!archiveModal.jar}
+        onClose={() => setArchiveModal({ jar: null, targetStatus: null })}
+        onConfirm={confirmToggleArchive}
+        title={archiveModal.targetStatus === 'archived' ? 'Xác nhận Lưu trữ Hũ' : 'Xác nhận Khôi phục Hũ'}
+        message={
+          archiveModal.jar
+            ? archiveModal.targetStatus === 'archived'
+              ? `Bạn có chắc chắn muốn lưu trữ hũ tiết kiệm "${archiveModal.jar.name}" không? Hũ sẽ được cất vào danh sách "Đã lưu trữ".`
+              : `Bạn có chắc chắn muốn khôi phục hũ tiết kiệm "${archiveModal.jar.name}" về danh sách "Đang tiến hành" không?`
+            : ''
+        }
+        confirmText={archiveModal.targetStatus === 'archived' ? 'Lưu trữ' : 'Khôi phục'}
+        cancelText="Hủy"
+        type={archiveModal.targetStatus === 'archived' ? 'warning' : 'primary'}
+        loading={isArchiving}
       />
 
       <ConfirmModal

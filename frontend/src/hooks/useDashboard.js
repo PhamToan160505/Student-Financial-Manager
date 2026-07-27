@@ -72,7 +72,7 @@ export function useDashboard() {
 
   const fetchAvailableBalance = useCallback(async () => {
     try {
-      const res = await dashboardService.getAvailableBalance();
+      const res = await dashboardService.getAvailableBalance(month);
       if (res.success && res.data) {
         return res.data;
       }
@@ -80,7 +80,7 @@ export function useDashboard() {
       console.warn('[useDashboard] Available balance fetch warning:', err.message);
     }
     return null;
-  }, []);
+  }, [month]);
 
   const fetchAll = useCallback(async () => {
     fetchStatsAndForecast();

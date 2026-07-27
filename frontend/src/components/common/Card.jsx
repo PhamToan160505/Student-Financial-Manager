@@ -26,7 +26,7 @@ export default function Card({
           {headerAction && <div>{headerAction}</div>}
         </div>
       )}
-      <div className="p-6">
+      <div className="p-6 flex-1 flex flex-col">
         {children}
       </div>
       {footer && (

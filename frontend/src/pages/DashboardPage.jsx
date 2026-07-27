@@ -6,6 +6,7 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Navbar from '../components/common/Navbar';
 import DashboardSummary from '../components/dashboard/DashboardSummary';
+import { useNavigate } from 'react-router-dom';
 import AnalyticsPanel from '../components/dashboard/AnalyticsPanel';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import TransactionModal from '../components/transaction/TransactionModal';
@@ -13,9 +14,10 @@ import MonthPicker from '../components/common/MonthPicker';
 import { LayoutDashboard, Calendar as CalendarIcon, RefreshCw, Plus, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function DashboardPage({ onNavigateToPage }) {
+export default function DashboardPage() {
   const { stats, loading, error, month, setMonth, refetch, fetchAvailableBalance } = useDashboard();
   const { categories } = useCategories();
+  const navigate = useNavigate();
   
   const [availableBalanceData, setAvailableBalanceData] = useState(null);
 
@@ -38,9 +40,9 @@ export default function DashboardPage({ onNavigateToPage }) {
   };
 
   return (
-    <>
-      <Navbar activePage="dashboard" onNavigateToPage={onNavigateToPage} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
         <div className="space-y-6 animate-fadeIn">
           {/* Page Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -126,7 +128,7 @@ export default function DashboardPage({ onNavigateToPage }) {
           <div className="w-full">
             <RecentTransactions
               transactions={stats.recentTransactions}
-              onNavigateToAll={() => onNavigateToPage && onNavigateToPage('transactions')}
+              onNavigateToAll={() => navigate('/transactions')}
               onAddTransaction={() => setShowCreateModal(true)}
             />
           </div>
@@ -139,9 +141,16 @@ export default function DashboardPage({ onNavigateToPage }) {
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateTransaction}
         categories={categories}
+        initialDate={
+          (() => {
+            const today = new Date();
+            const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            return (month >= currentMonthStr) ? today.toISOString().slice(0, 10) : `${month}-01`;
+          })()
+        }
       />
         </div>
       </main>
-    </>
+    </div>
   );
 }

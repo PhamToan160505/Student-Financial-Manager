@@ -65,12 +65,8 @@ export default function TransactionModal({
 
   // Date limits
   const todayObj = new Date();
-  const minDateObj = new Date(todayObj);
-  minDateObj.setDate(todayObj.getDate() - 3);
-  const minDateStr = minDateObj.toISOString().slice(0, 10);
 
   const maxDateObj = new Date(todayObj);
-  maxDateObj.setDate(todayObj.getDate() + 7);
   const maxDateStr = maxDateObj.toISOString().slice(0, 10);
 
   // Filter categories by selected type and put "Khác" at the end
@@ -277,7 +273,6 @@ export default function TransactionModal({
               id="tx-date"
               type="date"
               value={form.transactionDate}
-              min={minDateStr}
               max={maxDateStr}
               onChange={(e) => setForm(p => ({ ...p, transactionDate: e.target.value }))}
               className="w-full px-3.5 py-2 text-sm font-medium bg-white border border-neutral-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
