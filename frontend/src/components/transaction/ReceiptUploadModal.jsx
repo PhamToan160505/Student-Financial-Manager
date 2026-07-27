@@ -195,7 +195,6 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
             </div>
             <div>
               <h3 className="font-semibold text-lg text-neutral-maintext">Quét & Phân Loại Hóa Đơn AI</h3>
-              <p className="text-xs text-neutral-subtext">Tesseract.js (vie+eng) & Groq AI (openai/gpt-oss-120b)</p>
             </div>
           </div>
           <button 
@@ -429,7 +428,7 @@ const ReceiptUploadModal = ({ isOpen, onClose, categories, onSuccess }) => {
                 <div className="text-[11px] text-neutral-subtext pt-1 flex items-center justify-between border-t border-neutral-border">
                   <span>Nguồn ghi nhận:</span>
                   <span className={`font-semibold ${isModifiedByUser() ? 'text-warning' : 'text-primary'}`}>
-                    {isModifiedByUser() ? '✍️ Điều chỉnh thủ công (manual)' : '🤖 AI tự động bóc tách (ai)'}
+                    {isModifiedByUser() ? '✍️ Điều chỉnh thủ công' : '🤖 AI tự động bóc tách'}
                   </span>
                 </div>
 
