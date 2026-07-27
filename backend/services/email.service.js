@@ -10,10 +10,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  // Force IPv4 ONLY for Nodemailer by passing a custom lookup function to the underlying socket
-  lookup: (hostname, options, callback) => {
-    dns.lookup(hostname, { family: 4 }, callback);
-  },
   connectionTimeout: 15000, // 15 seconds
   greetingTimeout: 15000,
   socketTimeout: 15000,
