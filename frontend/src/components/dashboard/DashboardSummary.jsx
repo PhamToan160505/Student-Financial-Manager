@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Info } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 /**
@@ -59,114 +59,140 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
     );
   };
 
+  // Calculate percentages for the stacked bar
+  let pLocked = 0, pBudget = 0, pAvail = 0;
+  if (availableBalanceData) {
+    const locked = Math.max(0, availableBalanceData.total_locked_in_jars);
+    const budget = Math.max(0, availableBalanceData.total_remaining_budgets);
+    const avail = Math.max(0, availableBalanceData.available_balance);
+    const totalPositive = locked + budget + avail;
+    if (totalPositive > 0) {
+      pLocked = (locked / totalPositive) * 100;
+      pBudget = (budget / totalPositive) * 100;
+      pAvail = 100 - pLocked - pBudget;
+    }
+  }
+
   return (
     <div className="space-y-4">
-      {/* 0. Banner Tài sản hiện có (Lũy kế toàn thời gian) */}
+      {/* 0. Banner Phân bổ Số dư (Lũy kế toàn thời gian) */}
       {availableBalanceData && (
-        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-neutral-bg border border-blue-100/80 p-3.5 md:p-4 rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 shrink-0 shadow-sm">
-              <Wallet className="w-6 h-6 text-primary" />
-            </div>
+        <div className="bg-white border border-neutral-border p-4 sm:p-5 rounded-2xl shadow-sm">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            {/* Top row: Label + Total */}
             <div>
-              <p className="text-[11px] font-bold text-primary tracking-wider uppercase">SỐ DƯ KHẢ DỤNG</p>
-              <p className="text-[11px] text-neutral-subtext mt-0.5 mb-1 font-medium">(Tiền rảnh rỗi chưa phân bổ)</p>
-              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-primary">
-                {availableBalanceData.available_balance >= 0 ? `+` : ''}{formatCurrency(availableBalanceData.available_balance)}
+              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider mb-1">
+                Tổng số dư thực tế
+              </p>
+              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-neutral-maintext">
+                {formatCurrency(availableBalanceData.total_actual_balance)}
               </p>
             </div>
-          </div>
 
-          <div className="w-full md:w-auto flex flex-col gap-2 bg-white/90 p-2.5 px-3.5 rounded-xl border border-neutral-border shadow-sm text-xs min-w-[260px]">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-neutral-subtext font-medium">Tổng số dư thực tế:</span>
-              <span className="font-extrabold text-neutral-maintext">{formatCurrency(availableBalanceData.total_actual_balance)}</span>
+            {/* Middle: Stacked Bar */}
+            <div className="h-3 sm:h-4 w-full rounded-full overflow-hidden flex bg-neutral-bg">
+              {pLocked > 0 && <div style={{ width: `${pLocked}%` }} className="bg-purple-500 h-full transition-all" title="Đã khóa trong hũ" />}
+              {pBudget > 0 && <div style={{ width: `${pBudget}%` }} className="bg-warning h-full transition-all" title="Ngân sách chưa tiêu" />}
+              {pAvail > 0 && <div style={{ width: `${pAvail}%` }} className="bg-primary h-full transition-all" title="Số dư khả dụng" />}
             </div>
-            <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-neutral-border/60">
-              <span className="text-neutral-subtext font-medium">Đang khóa trong hũ:</span>
-              <span className="font-extrabold text-danger">{formatCurrency(availableBalanceData.total_locked_in_jars)}</span>
+
+            {/* Bottom: 3 Columns Legend */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {/* Col 1 */}
+              <div className="flex items-start gap-2">
+                <div className="w-3 h-3 rounded-sm bg-purple-500 shrink-0 mt-0.5"></div>
+                <div>
+                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Đã khóa trong hũ</p>
+                  <p className="text-sm font-bold text-neutral-maintext">{formatCurrency(availableBalanceData.total_locked_in_jars)}</p>
+                </div>
+              </div>
+              {/* Col 2 */}
+              <div className="flex items-start gap-2">
+                <div className="w-3 h-3 rounded-sm bg-warning shrink-0 mt-0.5"></div>
+                <div>
+                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Ngân sách chưa tiêu</p>
+                  <p className="text-sm font-bold text-neutral-maintext">{formatCurrency(availableBalanceData.total_remaining_budgets)}</p>
+                </div>
+              </div>
+              {/* Col 3 */}
+              <div className="flex items-start gap-2">
+                <div className="w-3 h-3 rounded-sm bg-primary shrink-0 mt-0.5"></div>
+                <div>
+                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Số dư khả dụng</p>
+                  <p className="text-sm font-bold text-primary">
+                    {availableBalanceData.available_balance > 0 ? '+' : ''}{formatCurrency(availableBalanceData.available_balance)}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-neutral-border/60">
-              <span className="text-neutral-subtext font-medium">Ngân sách chưa tiêu:</span>
-              <span className="font-extrabold text-warning-darker">{formatCurrency(availableBalanceData.total_remaining_budgets)}</span>
-            </div>
+
+            {/* Note if available <= 0 */}
+            {availableBalanceData.available_balance <= 0 && (
+              <div className="flex items-center gap-1.5 text-[11px] text-neutral-subtext bg-neutral-bg/50 p-2 rounded-lg w-fit">
+                <Info className="w-4 h-4 shrink-0" />
+                <span>Toàn bộ số dư đã có kế hoạch rõ ràng — không có gì bất thường.</span>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* 4 KPI Cards theo tháng */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3 KPI Cards theo tháng */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* 1. Total Income */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Thu Nhập</p>
-            <div className="p-2 bg-success-light rounded-xl text-success shrink-0">
-              <TrendingUp className="w-5 h-5" />
+        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Thu Nhập</p>
+              <div className="p-2 bg-success-light rounded-xl text-success shrink-0">
+                <TrendingUp className="w-5 h-5" />
+              </div>
             </div>
+            <p className="text-xl font-bold text-success tabular-nums truncate" title={`+${formatCurrency(income)}`}>+{formatCurrency(income)}</p>
           </div>
-          <p className="text-xl font-bold text-success tabular-nums truncate" title={`+${formatCurrency(income)}`}>+{formatCurrency(income)}</p>
+          <div className="mt-3">{renderChangeBadge(summary?.income_change, false)}</div>
         </div>
-        <div className="mt-3">{renderChangeBadge(summary?.income_change, false)}</div>
-      </div>
 
-      {/* 2. Total Expense */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Chi Tiêu</p>
-            <div className="p-2 bg-danger-light rounded-xl text-danger shrink-0">
-              <TrendingDown className="w-5 h-5" />
+        {/* 2. Total Expense */}
+        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Chi Tiêu</p>
+              <div className="p-2 bg-danger-light rounded-xl text-danger shrink-0">
+                <TrendingDown className="w-5 h-5" />
+              </div>
             </div>
+            <p className="text-xl font-bold text-danger tabular-nums truncate" title={`-${formatCurrency(expense)}`}>-{formatCurrency(expense)}</p>
           </div>
-          <p className="text-xl font-bold text-danger tabular-nums truncate" title={`-${formatCurrency(expense)}`}>-{formatCurrency(expense)}</p>
+          <div className="mt-3">{renderChangeBadge(summary?.expense_change, true)}</div>
         </div>
-        <div className="mt-3">{renderChangeBadge(summary?.expense_change, true)}</div>
-      </div>
 
-      {/* 3. Net Balance */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div>
-              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Số Dư Thực Tế</p>
-              <p className="text-[10px] text-neutral-subtext/70 mt-0.5">(Theo tháng đang xem)</p>
+        {/* 3. Savings Rate */}
+        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tỷ Lệ Tiết Kiệm</p>
+              <div className="p-2 bg-primary-light rounded-xl text-primary shrink-0">
+                <PiggyBank className="w-5 h-5" />
+              </div>
             </div>
-            <div className={`p-2 rounded-xl shrink-0 ${balance >= 0 ? 'bg-primary-light text-primary' : 'bg-danger-light text-danger'}`}>
-              <Wallet className="w-5 h-5" />
-            </div>
+            {savingsRate === null || savingsRate === undefined ? (
+              <p className="text-base font-bold text-neutral-subtext">Chưa có dữ liệu</p>
+            ) : (
+              <p className={`text-xl font-bold tabular-nums truncate ${savingsRate >= 20 ? 'text-primary' : savingsRate >= 0 ? 'text-success' : 'text-danger'}`} title={`${savingsRate}%`}>
+                {savingsRate}%
+              </p>
+            )}
           </div>
-          <p className={`text-xl font-bold tabular-nums truncate ${balance >= 0 ? 'text-primary' : 'text-danger'}`} title={balance >= 0 ? `+${formatCurrency(balance)}` : formatCurrency(balance)}>
-            {balance >= 0 ? `+${formatCurrency(balance)}` : formatCurrency(balance)}
+          <p className="text-[11px] text-neutral-subtext mt-3 font-medium">
+            {savingsRate === null || savingsRate === undefined
+              ? 'Cần ghi nhận thu nhập để tính'
+              : savingsRate >= 20
+              ? '🎯 Đạt mục tiêu tiết kiệm chuẩn (> 20%)'
+              : '💡 Tiết kiệm = (Thu - Chi) / Thu'}
           </p>
         </div>
-        <p className="text-[11px] text-neutral-subtext mt-3 font-medium">
-          {balance >= 0 ? '✨ Dòng tiền dương, quản lý tốt' : '⚠️ Chi đang vượt thu'}
-        </p>
       </div>
-
-      {/* 4. Tổng Tiền Trong Hũ */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider pt-1">Tổng Tiền Trong Hũ</p>
-            <div className="p-2 bg-primary-light rounded-xl text-primary shrink-0">
-              <PiggyBank className="w-5 h-5" />
-            </div>
-          </div>
-          {availableBalanceData ? (
-            <p className="text-xl font-bold text-primary tabular-nums truncate" title={formatCurrency(availableBalanceData.total_locked_in_jars)}>
-              {formatCurrency(availableBalanceData.total_locked_in_jars)}
-            </p>
-          ) : (
-            <p className="text-base font-bold text-neutral-subtext">Đang tải...</p>
-          )}
-        </div>
-        <p className="text-[11px] text-neutral-subtext mt-3 font-medium">
-          🔒 Số tiền đang được khóa an toàn
-        </p>
-      </div>
-    </div>
     </div>
   );
 }
