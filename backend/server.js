@@ -29,6 +29,9 @@ const savingsJarRoutes = require('./routes/savingsJar.routes');
 
 const app = express();
 
+// Trust proxy (Render's load balancer) for express-rate-limit
+app.set('trust proxy', 1);
+
 // 1. General Middlewares (Security & Logging)
 app.use(helmet());
 app.use(cors({
