@@ -21,25 +21,27 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
           {emoji}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-neutral-maintext truncate">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+            <span className="text-sm font-semibold text-neutral-maintext line-clamp-2">
               {transaction.category_name || 'Khác'}
             </span>
             <span className="text-xs text-neutral-subtext flex items-center gap-1 shrink-0">
-              • <Calendar className="w-3 h-3" /> {formattedDate}
+              <span className="hidden sm:inline">•</span> <Calendar className="w-3 h-3" /> {formattedDate}
             </span>
           </div>
           
           {(transaction.merchant || transaction.note) && (
-            <div className="flex items-center gap-3 mt-1 text-xs text-neutral-subtext truncate">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1.5 text-xs text-neutral-subtext">
               {transaction.merchant && (
-                <span className="flex items-center gap-1 truncate text-neutral-maintext font-medium">
-                  <MapPin className="w-3 h-3 text-primary shrink-0" /> {transaction.merchant}
+                <span className="flex items-start sm:items-center gap-1 text-neutral-maintext font-medium">
+                  <MapPin className="w-3 h-3 text-primary shrink-0 mt-0.5 sm:mt-0" />
+                  <span className="line-clamp-2 break-words">{transaction.merchant}</span>
                 </span>
               )}
               {transaction.note && (
-                <span className="flex items-center gap-1 truncate">
-                  <FileText className="w-3 h-3 shrink-0" /> {transaction.note}
+                <span className="flex items-start sm:items-center gap-1">
+                  <FileText className="w-3 h-3 shrink-0 mt-0.5 sm:mt-0" />
+                  <span className="line-clamp-2 break-words">{transaction.note}</span>
                 </span>
               )}
             </div>
