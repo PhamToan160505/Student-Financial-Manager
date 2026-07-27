@@ -11,9 +11,9 @@ import {
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, disabled: false },
   { id: 'transactions', label: 'Sổ thu chi', icon: ArrowLeftRight, disabled: false },
-  { id: 'category', label: 'Danh mục', icon: Tag, disabled: false },
   { id: 'budget', label: 'Ngân sách', icon: PieChart, disabled: false },
   { id: 'savings', label: 'Tiết kiệm', icon: PiggyBank, disabled: false },
+  { id: 'category', label: 'Danh mục', icon: Tag, disabled: false },
 ];
 
 /**
