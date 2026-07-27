@@ -184,7 +184,7 @@ export default function TransactionsPage() {
 
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-neutral-maintext">Nhật ký thu chi</h3>
                 <p className="text-sm text-neutral-subtext">Hiển thị {transactions.length} khoản thu/chi trong tháng</p>

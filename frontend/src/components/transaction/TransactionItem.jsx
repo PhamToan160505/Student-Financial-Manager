@@ -12,10 +12,10 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
   const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '';
 
   return (
-    <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-neutral-border hover:border-primary/40 hover:shadow-sm transition-all group">
-      <div className="flex items-center gap-3.5 min-w-0">
+    <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-white rounded-xl sm:rounded-2xl border border-neutral-border hover:border-primary/40 hover:shadow-sm transition-all group">
+      <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
         <div
-          className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-sm"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-sm"
           style={{ backgroundColor: `${transaction.category_color || '#2563EB'}18` }}
         >
           {emoji}
@@ -47,18 +47,18 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 shrink-0 ml-3">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-2 sm:ml-3">
         <div className="text-right">
-          <p className={`text-base font-bold tabular-nums ${isIncome ? 'text-success' : 'text-danger'}`}>
+          <p className={`text-sm sm:text-base font-bold tabular-nums ${isIncome ? 'text-success' : 'text-danger'}`}>
             {isIncome ? `+${formatCurrency(transaction.amount)}` : `-${formatCurrency(transaction.amount)}`}
           </p>
-          <span className="text-[10px] uppercase font-semibold text-neutral-subtext">
+          <span className="text-[9px] sm:text-[10px] uppercase font-semibold text-neutral-subtext">
             {isIncome ? 'Thu nhập' : 'Chi tiêu'}
           </span>
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col sm:flex-row items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(transaction)}
             className="p-1.5 rounded-lg text-neutral-subtext hover:text-primary hover:bg-primary-light transition-colors"
