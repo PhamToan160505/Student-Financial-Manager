@@ -1,21 +1,6 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
-// Absolute bulletproof hack to force IPv4 for Nodemailer on Render
-// Overrides the core dns.lookup to ALWAYS use family: 4 (IPv4)
-const originalLookup = dns.lookup;
-dns.lookup = function(hostname, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = { family: 4 };
-  } else if (typeof options === 'object') {
-    options.family = 4;
-  } else {
-    options = { family: 4 };
-  }
-  return originalLookup(hostname, options, callback);
-};
-
 // Setup transporter using Gmail SMTP with robust settings for cloud deployment
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -25,7 +10,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  family: 4, // Force IPv4 to prevent ENETUNREACH on Render
+  // Force IPv4 ONLY for Nodemailer by passing a custom lookup function to the underlying socket
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, callback);
+  },
   connectionTimeout: 15000, // 15 seconds
   greetingTimeout: 15000,
   socketTimeout: 15000,
