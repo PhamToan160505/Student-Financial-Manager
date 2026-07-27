@@ -1,10 +1,20 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 
-// Force IPv4 resolution to prevent ENETUNREACH errors on cloud providers that lack IPv6 routes (like Render)
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
+// Absolute bulletproof hack to force IPv4 for Nodemailer on Render
+// Overrides the core dns.lookup to ALWAYS use family: 4 (IPv4)
+const originalLookup = dns.lookup;
+dns.lookup = function(hostname, options, callback) {
+  if (typeof options === 'function') {
+    callback = options;
+    options = { family: 4 };
+  } else if (typeof options === 'object') {
+    options.family = 4;
+  } else {
+    options = { family: 4 };
+  }
+  return originalLookup(hostname, options, callback);
+};
 
 // Setup transporter using Gmail SMTP with robust settings for cloud deployment
 const transporter = nodemailer.createTransport({
