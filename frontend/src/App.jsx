@@ -35,7 +35,9 @@ function MainAppContent() {
         {/* Public Routes */}
         {!isAuthenticated ? (
           <>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login" element={<LoginPage initialMode="login" />} />
+            <Route path="/register" element={<LoginPage initialMode="register" />} />
+            <Route path="/forgot-password" element={<LoginPage initialMode="forgot_email" />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </>
         ) : (
