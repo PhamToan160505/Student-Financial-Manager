@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../controllers/useAuth';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
@@ -31,11 +32,11 @@ function PasswordStrengthIndicator({ password }) {
   );
 }
 
-export default function LoginPage() {
+export default function LoginPage({ initialMode = 'login' }) {
   const { login, register, completeLogin, rememberDevice, verifyOtp, resendOtp, forgotPassword, resetPassword, verifyResetOtp } = useAuth();
   
   // 'login', 'register', 'verify_otp', 'forgot_email', 'forgot_otp', 'reset_password'
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState(initialMode);
   const [loading, setLoading] = useState(false);
   const savedEmail = localStorage.getItem('rememberedEmail') || '';
   const [rememberMe, setRememberMe] = useState(!!savedEmail);
@@ -44,6 +45,10 @@ export default function LoginPage() {
     // Purge any legacy stored raw password credential from localStorage
     localStorage.removeItem('rememberedPassword');
   }, []);
+
+  useEffect(() => {
+    setAuthMode(initialMode);
+  }, [initialMode]);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -242,9 +247,18 @@ export default function LoginPage() {
     }
   };
 
+  const navigate = useNavigate();
+
   const switchMode = (mode) => {
     setAuthMode(mode);
     setErrors({});
+    if (mode === 'login') {
+      navigate('/login', { replace: true });
+    } else if (mode === 'register') {
+      navigate('/register', { replace: true });
+    } else if (mode === 'forgot_email') {
+      navigate('/forgot-password', { replace: true });
+    }
   };
 
   return (
