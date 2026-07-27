@@ -77,38 +77,45 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
     <div className="space-y-4">
       {/* 0. Banner Phân bổ Số dư (Lũy kế toàn thời gian) */}
       {availableBalanceData && (
-        <div className="bg-white border border-neutral-border p-4 sm:p-5 rounded-2xl shadow-sm">
+        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-neutral-bg border border-blue-100/80 p-4 sm:p-5 rounded-2xl shadow-sm">
           <div className="flex flex-col gap-4 sm:gap-5">
             {/* Top row: Label + Total */}
-            <div>
-              <p className="text-xs font-semibold text-neutral-subtext uppercase tracking-wider mb-1">
-                Tổng số dư thực tế
-              </p>
-              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-neutral-maintext">
-                {formatCurrency(availableBalanceData.total_actual_balance)}
-              </p>
+            <div className="flex items-center gap-3.5">
+              <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 shrink-0 shadow-sm">
+                <Wallet className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-primary tracking-wider uppercase mb-0.5">
+                  Tổng số dư thực tế
+                </p>
+                <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-primary">
+                  {formatCurrency(availableBalanceData.total_actual_balance)}
+                </p>
+              </div>
             </div>
 
             {/* Middle: Stacked Bar */}
-            <div className="h-3 sm:h-4 w-full rounded-full overflow-hidden flex bg-neutral-bg">
-              {pLocked > 0 && <div style={{ width: `${pLocked}%` }} className="bg-purple-500 h-full transition-all" title="Đã khóa trong hũ" />}
-              {pBudget > 0 && <div style={{ width: `${pBudget}%` }} className="bg-warning h-full transition-all" title="Ngân sách chưa tiêu" />}
+            <div className="h-3 sm:h-4 w-full rounded-full overflow-hidden flex bg-neutral-bg/50 border border-white/20">
               {pAvail > 0 && <div style={{ width: `${pAvail}%` }} className="bg-primary h-full transition-all" title="Số dư khả dụng" />}
+              {pBudget > 0 && <div style={{ width: `${pBudget}%` }} className="bg-blue-400 h-full transition-all" title="Ngân sách chưa tiêu" />}
+              {pLocked > 0 && <div style={{ width: `${pLocked}%` }} className="bg-slate-400 h-full transition-all" title="Đã khóa trong hũ" />}
             </div>
 
             {/* Bottom: 3 Columns Legend */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 bg-white/70 backdrop-blur-sm p-3.5 sm:p-4 rounded-xl border border-white shadow-sm mt-1">
               {/* Col 1 */}
               <div className="flex items-start gap-2">
-                <div className="w-3 h-3 rounded-sm bg-purple-500 shrink-0 mt-0.5"></div>
+                <div className="w-3 h-3 rounded-sm bg-primary shrink-0 mt-0.5 shadow-sm"></div>
                 <div>
-                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Đã khóa trong hũ</p>
-                  <p className="text-sm font-bold text-neutral-maintext">{formatCurrency(availableBalanceData.total_locked_in_jars)}</p>
+                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Số dư khả dụng</p>
+                  <p className="text-sm font-bold text-primary">
+                    {availableBalanceData.available_balance > 0 ? '+' : ''}{formatCurrency(availableBalanceData.available_balance)}
+                  </p>
                 </div>
               </div>
               {/* Col 2 */}
               <div className="flex items-start gap-2">
-                <div className="w-3 h-3 rounded-sm bg-warning shrink-0 mt-0.5"></div>
+                <div className="w-3 h-3 rounded-sm bg-blue-400 shrink-0 mt-0.5 shadow-sm"></div>
                 <div>
                   <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Ngân sách chưa tiêu</p>
                   <p className="text-sm font-bold text-neutral-maintext">{formatCurrency(availableBalanceData.total_remaining_budgets)}</p>
@@ -116,12 +123,10 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
               </div>
               {/* Col 3 */}
               <div className="flex items-start gap-2">
-                <div className="w-3 h-3 rounded-sm bg-primary shrink-0 mt-0.5"></div>
+                <div className="w-3 h-3 rounded-sm bg-slate-400 shrink-0 mt-0.5 shadow-sm"></div>
                 <div>
-                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Số dư khả dụng</p>
-                  <p className="text-sm font-bold text-primary">
-                    {availableBalanceData.available_balance > 0 ? '+' : ''}{formatCurrency(availableBalanceData.available_balance)}
-                  </p>
+                  <p className="text-[11px] text-neutral-subtext font-medium uppercase tracking-wider">Đã khóa trong hũ</p>
+                  <p className="text-sm font-bold text-neutral-maintext">{formatCurrency(availableBalanceData.total_locked_in_jars)}</p>
                 </div>
               </div>
             </div>
