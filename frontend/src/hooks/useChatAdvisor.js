@@ -32,26 +32,35 @@ export function useChatAdvisor() {
     }
   }, [isOpen, messages.length, fetchHistory]);
 
-  const sendMessage = async (text) => {
-    if (!text || !text.trim() || sending) return;
-    const trimmed = text.trim();
+  const sendMessage = async (text, imageFiles = []) => {
+    // text can be empty if images are provided
+    if ((!text || !text.trim()) && imageFiles.length === 0) return;
+    if (sending) return;
+    const trimmed = text ? text.trim() : '';
     if (trimmed.length > 500) {
       toast.error('Tin nhắn không được vượt quá 500 ký tự');
       return;
+    }
+
+    // Create local object URLs for instant preview before upload
+    let localImageUrls = [];
+    if (imageFiles && imageFiles.length > 0) {
+      localImageUrls = imageFiles.map(file => URL.createObjectURL(file));
     }
 
     // Optimistically add user message to UI
     const tempUserMsg = {
       id: `temp-${Date.now()}`,
       role: 'user',
-      content: trimmed,
+      content: trimmed || `Đã gửi ${imageFiles.length} ảnh`, // Default text if only images are sent
+      imageUrls: localImageUrls,
       createdAt: new Date().toISOString()
     };
     setMessages(prev => [...prev, tempUserMsg]);
     setSending(true);
 
     try {
-      const res = await chatService.sendMessage(trimmed);
+      const res = await chatService.sendMessage(trimmed, imageFiles);
       if (res && res.success) {
         if (res.data?.type === 'action_pending') {
           // AI proposed a transaction — add as action card message

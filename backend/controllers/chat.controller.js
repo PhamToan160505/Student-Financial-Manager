@@ -8,6 +8,24 @@ const { createTransactionCore } = require('./transaction.controller');
 const { upsertBudgetCore } = require('./budget.controller');
 const { getCurrentMonthVN, getCurrentDateVN } = require('../utils/timezone');
 const { sendSuccess, sendError } = require('../utils/response');
+const { cloudinary } = require('../config/cloudinary');
+const ocrService = require('../services/ocr.service');
+
+function uploadBufferToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'qlsv-finance/chat',
+        resource_type: 'image'
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+}
 
 function getGroqClient() {
   const apiKey = process.env.GROQ_API_KEY || env.GROQ_API_KEY;
@@ -55,20 +73,66 @@ const chatController = {
       const { message } = req.body;
 
       // 1. Strict validation (max 500 chars)
-      if (!message || typeof message !== 'string' || !message.trim()) {
+      let finalMessage = message;
+      // If req.body.message is missing but files are provided, set a default message
+      if ((!message || typeof message !== 'string' || !message.trim()) && req.files && req.files.length > 0) {
+        finalMessage = `Tôi vừa tải lên ${req.files.length} ảnh hóa đơn. Hãy giúp tôi xem xét chúng.`;
+      } else if (!message || typeof message !== 'string' || !message.trim()) {
         return sendError(res, 'Tin nhắn không được để trống', 400);
       }
-      const trimmedMessage = message.trim();
+
+      const trimmedMessage = finalMessage.trim();
       if (trimmedMessage.length > 500) {
         return sendError(res, 'Tin nhắn không được vượt quá 500 ký tự để bảo vệ hạn mức AI', 400);
+      }
+
+      let imageUrls = [];
+      let combinedOcrText = '';
+
+      if (req.files && req.files.length > 0) {
+        try {
+          console.log(`[Chat Controller] User uploaded ${req.files.length} images in chat. Processing sequentially to save memory...`);
+
+          const results = [];
+          let index = 1;
+          for (const file of req.files) {
+            try {
+              const cloudResult = await uploadBufferToCloudinary(file.buffer);
+              const ocrText = await ocrService.extractTextOnly(file.buffer);
+              results.push({
+                url: cloudResult.secure_url,
+                text: ocrText,
+                index: index++
+              });
+            } catch (err) {
+              console.error(`[Chat Controller] Failed to process image ${index}:`, err);
+              index++;
+            }
+          }
+
+          imageUrls = results.map(r => r.url);
+          combinedOcrText = results.map(r => `[Ảnh ${r.index}: "${r.text}"]`).join('\n\n');
+
+          console.log(`[Chat Controller] Successfully processed ${imageUrls.length} images.`);
+        } catch (uploadErr) {
+          console.error('[Chat Controller] Failed to process images:', uploadErr);
+          // Continue without images if it fails
+        }
       }
 
       // 2. Save user message to persistent DB
       await chatMessageModel.addMessage({
         userId,
         role: 'user',
-        content: trimmedMessage
+        content: trimmedMessage,
+        imageUrls: imageUrls
       });
+
+      // If image text is extracted, append it to the context sent to Groq
+      let messageForGroq = trimmedMessage;
+      if (combinedOcrText) {
+        messageForGroq += `\n\n[Hệ thống: Người dùng đã đính kèm ${req.files.length} ảnh hóa đơn/tài liệu. Dưới đây là văn bản trích xuất từ các ảnh:\n${combinedOcrText}]\n(Gợi ý: Dựa vào văn bản trên để giúp người dùng phân tích bill, chia tiền hoặc giải đáp thắc mắc nếu người dùng yêu cầu)`;
+      }
 
       // 3. Concurrently fetch dynamic financial context, category list & sliding window
       const currentMonth = getCurrentMonthVN();
@@ -107,8 +171,7 @@ const chatController = {
       }
 
       // 4. Construct rich System Prompt with Anti-Hallucination boundaries and Category Breakdown
-     const systemPrompt = `Bạn là Trợ lý & Cố vấn Tài chính AI cá nhân chuyên biệt cho sinh viên/freelancer Việt Nam (chạy trên model \`openai/gpt-oss-120b\`).
-
+      const systemPrompt = `Bạn là Trợ lý & Cố vấn Tài chính AI cá nhân chuyên biệt cho sinh viên/freelancer Việt Nam
 Dưới đây là Ngữ cảnh Tài chính tháng hiện tại (${currentMonth}) của người dùng đang trò chuyện:
 - Tổng thu nhập đã ghi nhận: ${forecastData.totalIncomeSoFar.toLocaleString('vi-VN')} đ
 - Tổng chi tiêu đã ghi nhận: ${forecastData.totalSpentSoFar.toLocaleString('vi-VN')} đ
@@ -178,15 +241,34 @@ __ACTION__:{"intent":"create_transaction","type":"expense","amount":700000,"cate
 - Chọn categoryId chính xác từ danh sách danh mục ở trên. Nếu không khớp hoàn toàn, chọn cái gần nhất.
 
 ===== 8. TUYỆT ĐỐI KHÔNG GIẢ VỜ ĐÃ LƯU =====
-Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user nói "ghi/lưu/thêm" nhưng bạn không đủ thông tin để tạo __ACTION__, hãy hỏi lại. TUYỆT ĐỐI KHÔNG trả lời kiểu "Đã ghi nhận...", "Đã lưu thành công..." hoặc trình bày số liệu như thể giao dịch đã được lưu thật — điều đó gây hiểu lầm nghiêm trọng.`;
+Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user nói "ghi/lưu/thêm" nhưng bạn không đủ thông tin để tạo __ACTION__, hãy hỏi lại. TUYỆT ĐỐI KHÔNG trả lời kiểu "Đã ghi nhận...", "Đã lưu thành công..." hoặc trình bày số liệu như thể giao dịch đã được lưu thật — điều đó gây hiểu lầm nghiêm trọng.
+
+===== 9. XỬ LÝ HÓA ĐƠN OCR (CHIA TIỀN) =====
+- Khi người dùng đính kèm ảnh, bạn sẽ nhận được một đoạn text (OCR) trích xuất từ ảnh đó. Đoạn text này có thể lộn xộn, dính chữ, sai khoảng trắng.
+- Hãy tự động bỏ qua các lỗi OCR, cố gắng đọc các món ăn và số tiền tương ứng.
+- Để tìm TỔNG TIỀN (Total), hãy dò tìm con số lớn nhất hợp lý nhất nằm gần các từ như "TOTAL", "SUB TOTAL", "TỔNG CỘNG", "AMOUNT" (Ví dụ trong OCR có 79,000, 72,000, 7,000 thì tổng chắc chắn là 79.000). Đừng bối rối nếu OCR quét bị dính chữ (ví dụ 1 72,000).
+- Hãy dùng tư duy logic để cộng nhẩm các món lại, tự tin chọn ra tổng tiền hợp lý nhất. Tuyệt đối không bắt người dùng cung cấp lại tổng tiền nếu bạn có thể tự đoán ra một con số hợp lý từ OCR.
+- Khi người dùng nhờ "chia bill", hãy LINH HOẠT DỰA VÀO BỐI CẢNH (LOẠI HÓA ĐƠN):
+  + NẾU LÀ BILL DÙNG CHUNG (Ăn lẩu, nướng, thức ăn chung, karaoke, thuê xe...): Hãy tự tin CHIA ĐỀU số tổng hợp lý đó cho số người. Liệt kê rõ [Tổng tiền] / [Số người] = [Số tiền mỗi người] (làm tròn lên cho dễ chia nếu cần).
+  + NẾU LÀ BILL CÁ NHÂN HÓA (Trà sữa, cafe, nước uống... nơi mỗi người chọn món khác nhau giá khác nhau): KHÔNG ĐƯỢC tự động chia đều tổng tiền! Hãy phân tích và liệt kê các món nước trong bill kèm giá, sau đó HỎI người dùng xem ai đã dùng món nào để tính tiền cho chính xác. (Trừ khi người dùng nhấn mạnh "cứ chia đều hết đi").
+- Nếu người dùng tải lên nhiều ảnh (cả bill chung lẫn bill riêng), hãy khéo léo gom phần dùng chung chia đều, cộng với phần dùng riêng của từng người (nếu họ đã chỉ định tên).`;
 
       // Prepare sliding window messages array for Groq
       const messagesForAI = [
         { role: 'system', content: systemPrompt },
-        ...recentHistory.map(m => ({
-          role: m.role,
-          content: m.content
-        }))
+        ...recentHistory.map(m => {
+          // Check if this is the latest user message and append the OCR text if present
+          if (m.role === 'user' && m.id === recentHistory[recentHistory.length - 1].id && combinedOcrText) {
+            return {
+              role: 'user',
+              content: messageForGroq
+            };
+          }
+          return {
+            role: m.role,
+            content: m.content
+          };
+        })
       ];
 
       // 5. Call Groq AI within robust try/catch
@@ -207,25 +289,25 @@ Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user
             const jsonStr = aiReplyContent.trimStart().slice('__ACTION__:'.length).trim();
             const actionData = JSON.parse(jsonStr);
             const { amount, categoryId, categoryName, type, note, date } = actionData;
-            
+
             const pendingTransaction = { amount, categoryId, categoryName, type, note: note || '', date: date || todayDate };
 
             // V2: Check if category needs budget setup (only for expense)
             if (type === 'expense') {
               const catBudget = categoryBudgets.find(cb => cb.category_id === categoryId);
               const isBudgeted = catBudget && catBudget.is_budgeted;
-              
+
               if (!isBudgeted) {
                 // Not budgeted -> enforce budget requirement
                 // Calculate suggested amount (round up to nearest 500k)
                 let suggestedAmount = Math.ceil(Number(amount) / 500000) * 500000;
-                
+
                 // Cap at max allowed income
                 const transactionModel = require('../models/transaction.model');
                 const totalIncome = await transactionModel.sumByType({ userId, month: currentMonth, type: 'income' });
                 const otherBudgetsTotal = await budgetModel.sumExcludingCategory({ userId, month: currentMonth, excludeCategoryId: categoryId });
                 const maxAllowed = totalIncome - otherBudgetsTotal;
-                
+
                 if (maxAllowed > 0 && suggestedAmount > maxAllowed) {
                   suggestedAmount = maxAllowed;
                 } else if (maxAllowed <= 0) {
@@ -358,7 +440,7 @@ Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user
       const summaryText = `[Đề xuất giao dịch: ${Number(actionPayload.amount).toLocaleString('vi-VN')}đ - ${actionPayload.categoryName || 'Khác'}${actionPayload.note ? ' - ' + actionPayload.note : ''}]`;
       await chatMessageModel.addMessage({ userId, role: 'assistant', content: summaryText });
 
-      return sendSuccess(res, { 
+      return sendSuccess(res, {
         type: 'action_pending',
         content: summaryText,
         actionPayload: actionPayload

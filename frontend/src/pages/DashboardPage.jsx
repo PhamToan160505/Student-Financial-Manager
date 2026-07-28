@@ -13,11 +13,14 @@ import TransactionModal from '../components/transaction/TransactionModal';
 import MonthPicker from '../components/common/MonthPicker';
 import { LayoutDashboard, Calendar as CalendarIcon, RefreshCw, Plus, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import useBudget from '../hooks/useBudget';
+import BudgetWarningBanner from '../components/budget/BudgetWarningBanner';
 
 export default function DashboardPage() {
   const { stats, loading, error, month, setMonth, refetch, fetchAvailableBalance } = useDashboard();
   const { categories } = useCategories();
   const navigate = useNavigate();
+  const { warnings: budgetWarnings, summary: budgetSummary } = useBudget(month);
   
   const [availableBalanceData, setAvailableBalanceData] = useState(null);
 
@@ -110,7 +113,9 @@ export default function DashboardPage() {
       )}
 
       {!loading && !error && (
-        <>
+        <div className="space-y-6">
+          <BudgetWarningBanner warnings={budgetWarnings} totalBudget={Number(budgetSummary?.total_budget || 0)} />
+          
           {/* 1. 4 KPI Cards */}
           <DashboardSummary summary={stats.summary} loading={false} availableBalanceData={availableBalanceData} />
 
@@ -132,7 +137,7 @@ export default function DashboardPage() {
               onAddTransaction={() => setShowCreateModal(true)}
             />
           </div>
-        </>
+        </div>
       )}
 
       {/* Transaction Modal triggered directly from Dashboard */}

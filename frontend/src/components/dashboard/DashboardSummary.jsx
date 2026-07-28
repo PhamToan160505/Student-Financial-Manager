@@ -28,7 +28,7 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
     if (changeObj.is_new) {
       return (
         <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded-md mt-1.5 border border-primary/20">
-          +100% (Tháng đầu ghi nhận)
+          Tháng đầu ghi nhận
         </span>
       );
     }
@@ -41,20 +41,21 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
       );
     }
     const isUp = val > 0;
-    // For income: up is good (green), down is bad (red)
-    // For expense (isInverse): up is bad (red), down is good (green)
     const isGood = isInverse ? !isUp : isUp;
+    const diffAmount = changeObj.diff_amount || 0;
+    const absDiff = Math.abs(diffAmount);
 
     return (
       <span
-        className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-md mt-1.5 border ${
+        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md mt-1.5 border ${
           isGood
             ? 'text-success bg-success-light border-success/20'
             : 'text-danger bg-danger-light border-danger/20'
         }`}
       >
         {isUp ? <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> : <ArrowDownRight className="w-3.5 h-3.5 shrink-0" />}
-        {isUp ? `+${val}%` : `${val}%`} <span className="font-normal opacity-80 ml-0.5">so tháng trước</span>
+        {isUp ? '+' : '-'}{formatCurrency(absDiff)}
+        <span className="font-normal opacity-80">so tháng trước</span>
       </span>
     );
   };

@@ -58,8 +58,8 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
 
   // If budget limit IS set
   const { amount, spent, remaining, percent_used } = item;
-  const isOver = percent_used >= 100;
-  const isWarning = percent_used >= 80 && percent_used < 100;
+  const isOver = percent_used > 100;
+  const isWarning = percent_used >= 80 && percent_used <= 100;
 
   // Determine progress bar fill and width (cap width strictly at 100%)
   const barColor = isOver ? 'bg-danger' : isWarning ? 'bg-warning' : 'bg-primary';

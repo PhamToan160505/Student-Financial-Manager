@@ -67,13 +67,13 @@ async function getDashboardStats(req, res, next) {
     // 2. Calculate percentage change vs previous month (Point 1: handle prevMonth === 0)
     function calcChange(currVal, prevVal) {
       if (prevVal === 0 && currVal > 0) {
-        return { value: 100, is_new: true };
+        return { value: 100, is_new: true, diff_amount: currVal };
       }
       if (prevVal === 0 && currVal === 0) {
-        return { value: 0, is_new: false };
+        return { value: 0, is_new: false, diff_amount: 0 };
       }
       const diffPercent = Math.round(((currVal - prevVal) / prevVal) * 100);
-      return { value: diffPercent, is_new: false };
+      return { value: diffPercent, is_new: false, diff_amount: currVal - prevVal };
     }
 
     const incomeChange = calcChange(currIncome, prevIncome);

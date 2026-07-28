@@ -61,6 +61,27 @@ const ocrService = {
       ocrExtractedMerchant: suggestions.merchant,
       aiSuggestedCategoryId: suggestions.suggestedCategoryId
     };
+  },
+
+  /**
+   * Extract text only without AI categorization (Useful for chat injection)
+   */
+  extractTextOnly: async (imageBuffer) => {
+    let rawText = '';
+    try {
+      const result = await Tesseract.recognize(
+        imageBuffer,
+        'vie+eng',
+        {
+          cachePath: cachePath,
+          cacheMethod: 'write'
+        }
+      );
+      rawText = result.data?.text || '';
+    } catch (err) {
+      console.error('[OCR Service] Tesseract extraction failed:', err.message);
+    }
+    return rawText.trim();
   }
 };
 

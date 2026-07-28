@@ -7,7 +7,17 @@ const chatService = {
   getHistory() {
     return api.get('/chat/history');
   },
-  sendMessage(message) {
+  sendMessage(message, imageFiles = []) {
+    if (imageFiles && imageFiles.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message);
+      imageFiles.forEach(file => {
+        formData.append('images', file);
+      });
+      return api.post('/chat/advisor', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    }
     return api.post('/chat/advisor', { message });
   },
   clearHistory() {

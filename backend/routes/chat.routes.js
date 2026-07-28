@@ -35,9 +35,25 @@ router.get('/history', chatController.getHistory);
 // DELETE /api/chat/history - Clear conversation history
 router.delete('/history', chatController.clearHistory);
 
+// Configure Multer with memoryStorage for image uploads in chat
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Chỉ chấp nhận định dạng ảnh hợp lệ (JPEG, PNG, WEBP)'));
+    }
+  }
+});
+
 // POST /api/chat/advisor - Send message to AI (Protected by BOTH rate limiters)
 // Note: verifyToken is mounted before these routes in server.js so req.user exists before keyGenerator runs!
-router.post('/advisor', chatShortRateLimiter, chatDailyRateLimiter, chatController.sendMessage);
+router.post('/advisor', chatShortRateLimiter, chatDailyRateLimiter, upload.array('images', 10), chatController.sendMessage);
 
 // [Điểm 5] Rate limit riêng cho endpoint ghi dữ liệu thật (tạo giao dịch từ chat)
 // Tách khỏi /advisor vì endpoint này thực sự ghi DB — cần rào riêng, thoải mái hơn nhưng vẫn có giới hạn.

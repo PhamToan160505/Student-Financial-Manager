@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertTriangle, ShieldCheck, Wallet, PieChart, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, Wallet, PieChart, ArrowUpRight } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
+import BudgetWarningBanner from './BudgetWarningBanner';
 
 /**
  * BudgetSummary - Displays overall monthly budget KPIs and intelligent warning alerts
@@ -24,49 +25,10 @@ export default function BudgetSummary({ summary, warnings, loading }) {
   const remaining = Number(summary?.remaining || 0);
   const percentOverall = totalBudget > 0 ? Math.round((totalSpentBudgeted / totalBudget) * 100) : 0;
 
-  // Determine highest alert severity among warnings
-  const hasOverBudget = warnings?.some(w => w.percent_used >= 100);
-  const hasNearBudget = warnings?.some(w => w.percent_used >= 80 && w.percent_used < 100);
-
   return (
     <div className="space-y-5">
       {/* 1. Intelligent Warning Banner */}
-      {warnings && warnings.length > 0 ? (
-        <div className={`p-4.5 rounded-2xl border flex items-start gap-3.5 transition-all shadow-sm ${
-          hasOverBudget 
-            ? 'bg-danger-light border-danger text-danger' 
-            : 'bg-warning-light border-warning text-warning-dark'
-        }`}>
-          <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 animate-bounce" />
-          <div className="space-y-1.5 flex-1">
-            <h4 className="font-bold text-base leading-snug">
-              {hasOverBudget 
-                ? `Cảnh báo: Có ${warnings.filter(w => w.percent_used >= 100).length} danh mục đã vượt hạn mức ngân sách!` 
-                : `Chú ý: Có ${warnings.length} danh mục đã chi tiêu trên 80% hạn mức!`}
-            </h4>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {warnings.map(w => (
-                <span 
-                  key={w.category_id}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white shadow-2xs border ${
-                    w.percent_used >= 100 ? 'border-danger text-danger' : 'border-warning text-warning-dark'
-                  }`}
-                >
-                  <span>{w.category_name}</span>
-                  <span className="font-bold">{w.percent_used >= 100 ? `(Vượt hạn mức)` : `(${w.percent_used}%)`}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : totalBudget > 0 ? (
-        <div className="p-4 rounded-2xl border border-success/30 bg-success-light text-success flex items-center gap-3 shadow-2xs">
-          <ShieldCheck className="w-6 h-6 shrink-0" />
-          <span className="font-medium text-sm sm:text-base">
-            Khả năng kiểm soát chi tiêu tốt! Các danh mục đều nằm trong hạn mức an toàn (&lt; 80%).
-          </span>
-        </div>
-      ) : null}
+      <BudgetWarningBanner warnings={warnings} totalBudget={totalBudget} />
 
       {/* 2. Overview KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -93,7 +55,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
           <div className="flex items-center justify-between text-neutral-subtext mb-2">
             <span className="text-sm font-medium">Đã chi TÍNH ĐẾN HÔM NAY</span>
             <div className={`p-2 rounded-xl ${
-              percentOverall >= 100 ? 'bg-danger-light text-danger' : percentOverall >= 80 ? 'bg-warning-light text-warning-dark' : 'bg-primary-light text-primary'
+              percentOverall > 100 ? 'bg-danger-light text-danger' : percentOverall >= 80 ? 'bg-warning-light text-warning-dark' : 'bg-primary-light text-primary'
             }`}>
               <ArrowUpRight className="w-5 h-5" />
             </div>
@@ -101,7 +63,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
           <div>
             <div className="flex items-baseline gap-2">
               <p className={`text-xl sm:text-2xl font-bold tracking-tight ${
-                percentOverall >= 100 ? 'text-danger' : percentOverall >= 80 ? 'text-warning-dark' : 'text-neutral-maintext'
+                percentOverall > 100 ? 'text-danger' : percentOverall >= 80 ? 'text-warning-dark' : 'text-neutral-maintext'
               }`}>
                 {formatCurrency(totalSpentBudgeted)}
               </p>
@@ -116,7 +78,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
               <div className="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden mt-2">
                 <div 
                   className={`h-full transition-all duration-500 rounded-full ${
-                    percentOverall >= 100 ? 'bg-danger' : percentOverall >= 80 ? 'bg-warning' : 'bg-primary'
+                    percentOverall > 100 ? 'bg-danger' : percentOverall >= 80 ? 'bg-warning' : 'bg-primary'
                   }`}
                   style={{ width: `${Math.min(percentOverall, 100)}%` }}
                 />

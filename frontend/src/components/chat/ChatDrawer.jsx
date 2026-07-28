@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Trash2, Bot, User, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Send, Trash2, Bot, User, Sparkles, Loader2, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import ActionCard from './ActionCard';
 import BudgetSuggestCard from './BudgetSuggestCard';
 
@@ -20,9 +20,12 @@ export default function ChatDrawer({
   onCancelAction
 }) {
   const [inputText, setInputText] = useState('');
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Auto scroll to bottom whenever messages update or drawer opens
   const scrollToBottom = () => {
@@ -40,10 +43,46 @@ export default function ChatDrawer({
 
   const handleSend = (e) => {
     e?.preventDefault();
-    if (!inputText.trim() || sending) return;
+    if ((!inputText.trim() && selectedImages.length === 0) || sending) return;
     if (inputText.trim().length > 500) return;
-    onSendMessage(inputText);
+    onSendMessage(inputText, selectedImages);
     setInputText('');
+    setSelectedImages([]);
+    setImagePreviews([]);
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    
+    // Check max limit (10 files total)
+    if (selectedImages.length + files.length > 10) {
+      alert('Chỉ được chọn tối đa 10 ảnh');
+      return;
+    }
+
+    const validFiles = [];
+    const previews = [];
+    
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`Ảnh "${file.name}" vượt quá dung lượng 5MB`);
+        continue;
+      }
+      validFiles.push(file);
+      previews.push(URL.createObjectURL(file));
+    }
+    
+    setSelectedImages(prev => [...prev, ...validFiles]);
+    setImagePreviews(prev => [...prev, ...previews]);
+    
+    // Reset file input so same files can be selected again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeImage = (indexToRemove) => {
+    setSelectedImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    setImagePreviews(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleKeyDown = (e) => {
@@ -67,9 +106,6 @@ export default function ChatDrawer({
               <h3 className="text-sm font-bold text-neutral-maintext flex items-center gap-1.5">
                 AI Cố Vấn Tài Chính <Sparkles className="w-3.5 h-3.5 text-warning" />
               </h3>
-              <p className="text-[11px] text-neutral-subtext font-medium">
-                Model: <code className="text-xs text-primary font-mono bg-white px-1 rounded border border-neutral-border">openai/gpt-oss-120b</code>
-              </p>
             </div>
           </div>
 
@@ -235,6 +271,21 @@ export default function ChatDrawer({
                       : 'bg-white text-neutral-maintext border border-neutral-border/80 rounded-tl-2xs max-w-[86%] mr-auto shadow-2xs whitespace-pre-line'
                   }`}
                 >
+                  {/* Render single or multiple images in chat bubble */}
+                  {msg.imageUrl && !msg.imageUrls && (
+                    <div className="mb-2 rounded-xl overflow-hidden bg-black/5 flex items-center justify-center">
+                      <img src={msg.imageUrl} alt="Đính kèm" className="max-w-full max-h-48 object-contain" />
+                    </div>
+                  )}
+                  {msg.imageUrls && msg.imageUrls.length > 0 && (
+                    <div className={`mb-2 grid gap-1.5 ${msg.imageUrls.length === 1 ? 'grid-cols-1' : msg.imageUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                      {msg.imageUrls.map((url, idx) => (
+                        <div key={idx} className="rounded-lg overflow-hidden bg-black/5 flex items-center justify-center">
+                          <img src={url} alt={`Đính kèm ${idx + 1}`} className="w-full h-auto object-cover max-h-48" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {msg.content}
                 </div>
                 {isUser && (
@@ -264,22 +315,57 @@ export default function ChatDrawer({
         </div>
 
         {/* Input Footer Area */}
-        <form onSubmit={handleSend} className="p-3 border-t border-neutral-border bg-white shrink-0">
-          <div className="relative">
+        <form onSubmit={handleSend} className="p-3 border-t border-neutral-border bg-white shrink-0 relative">
+          {imagePreviews.length > 0 && (
+            <div className="absolute bottom-full left-0 w-full p-3 bg-white border-t border-neutral-border shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] flex gap-2 overflow-x-auto">
+              {imagePreviews.map((preview, idx) => (
+                <div key={idx} className="relative inline-block shrink-0">
+                  <img src={preview} alt={`Preview ${idx}`} className="h-16 w-16 object-cover rounded-lg border border-neutral-200 shadow-sm" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute -top-1.5 -right-1.5 bg-danger text-white rounded-full p-0.5 shadow-md hover:bg-danger-hover cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImageChange} 
+            accept="image/jpeg, image/png, image/webp" 
+            multiple
+            className="hidden" 
+          />
+
+          <div className="relative flex items-center bg-neutral-bg border border-neutral-border focus-within:border-primary focus-within:bg-white rounded-xl transition-all">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending}
+              className="pl-3 pr-2 py-3 text-neutral-400 hover:text-primary transition-colors cursor-pointer disabled:cursor-not-allowed"
+              title="Đính kèm ảnh hóa đơn"
+            >
+              <ImageIcon className="w-5 h-5" />
+            </button>
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Hỏi số liệu..."
+              placeholder="Nhập tin nhắn..."
               disabled={sending}
-              className="w-full bg-neutral-bg border border-neutral-border focus:border-primary focus:bg-white rounded-xl py-3 pl-4 pr-12 text-sm text-neutral-maintext placeholder:text-neutral-subtext focus:outline-none resize-none transition-all block"
+              className="flex-1 bg-transparent py-3 pr-12 text-sm text-neutral-maintext placeholder:text-neutral-subtext focus:outline-none resize-none block"
             />
             <button
               type="submit"
-              disabled={!inputText.trim() || sending || inputText.trim().length > 500}
-              className="absolute right-2 bottom-2 p-1.5 bg-primary hover:bg-primary-hover disabled:bg-transparent disabled:text-neutral-subtext text-white rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+              disabled={(!inputText.trim() && selectedImages.length === 0) || sending || inputText.trim().length > 500}
+              className="absolute right-2 bottom-2 top-2 px-3 bg-primary hover:bg-primary-hover disabled:bg-neutral-200 disabled:text-neutral-400 text-white rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
               title="Gửi tin nhắn"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
