@@ -73,7 +73,11 @@ export function useTransactions() {
   const createTransaction = async (data) => {
     const res = await transactionService.create(data);
     if (res.success) {
-      toast.success(res.message || 'Thêm giao dịch thành công!');
+      if (res.data && res.data.warning) {
+        toast.success(res.message, { duration: 5000, icon: '⚠️' });
+      } else {
+        toast.success(res.message || 'Thêm giao dịch thành công!');
+      }
       await fetchTransactions();
       return res.data.transaction;
     }
@@ -83,7 +87,11 @@ export function useTransactions() {
   const updateTransaction = async (id, data) => {
     const res = await transactionService.update(id, data);
     if (res.success) {
-      toast.success(res.message || 'Cập nhật giao dịch thành công!');
+      if (res.data && res.data.warning) {
+        toast.success(res.message, { duration: 5000, icon: '⚠️' });
+      } else {
+        toast.success(res.message || 'Cập nhật giao dịch thành công!');
+      }
       await fetchTransactions();
     } else {
       throw new Error(res.message);

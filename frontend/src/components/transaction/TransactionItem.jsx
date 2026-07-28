@@ -11,6 +11,17 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
   // Format date DD/MM/YYYY
   const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '';
 
+  // Format time from created_at if available
+  let timeStr = '';
+  if (transaction.created_at) {
+    const d = new Date(transaction.created_at);
+    if (!isNaN(d.getTime())) {
+      timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  const displayDateTime = timeStr ? `${timeStr} - ${formattedDate}` : formattedDate;
+
   return (
     <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-white rounded-xl sm:rounded-2xl border border-neutral-border hover:border-primary/40 hover:shadow-sm transition-all group">
       <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
@@ -26,7 +37,7 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
               {transaction.category_name || 'Khác'}
             </span>
             <span className="text-xs text-neutral-subtext flex items-center gap-1 shrink-0">
-              <span className="hidden sm:inline">•</span> <Calendar className="w-3 h-3" /> {formattedDate}
+              <span className="hidden sm:inline">•</span> <Calendar className="w-3 h-3" /> {displayDateTime}
             </span>
           </div>
           

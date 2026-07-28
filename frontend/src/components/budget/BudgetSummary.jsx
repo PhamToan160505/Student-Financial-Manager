@@ -53,7 +53,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
                   }`}
                 >
                   <span>{w.category_name}</span>
-                  <span className="font-bold">({w.percent_used >= 100 ? `Vượt ${w.percent_used - 100}%` : `${w.percent_used}%`})</span>
+                  <span className="font-bold">{w.percent_used >= 100 ? `(Vượt hạn mức)` : `(${w.percent_used}%)`}</span>
                 </span>
               ))}
             </div>

@@ -125,7 +125,7 @@ export default function BudgetCard({ item, onEdit, onDelete }) {
           <div className="text-right">
             {isOver ? (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-danger-light text-danger">
-                Vượt {percent_used - 100}% ({formatCurrency(Math.abs(remaining))})
+                Vượt {formatCurrency(Math.abs(remaining))}
               </span>
             ) : isWarning ? (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-warning-light text-warning-dark">

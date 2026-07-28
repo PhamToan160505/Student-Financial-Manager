@@ -300,7 +300,7 @@ Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user
       const { amount, categoryId, type, note, date, categoryName } = actionPayload;
 
       // Delegate all validation to the shared core — single source of truth
-      const created = await createTransactionCore({
+      const { created, warningMessage } = await createTransactionCore({
         userId,
         categoryId,
         type,
@@ -312,7 +312,10 @@ Bạn KHÔNG CÓ khả năng tự lưu dữ liệu vào hệ thống. Nếu user
       });
 
       // Save confirmation text to chat history
-      const confirmText = `Đã ghi nhận ${Number(amount).toLocaleString('vi-VN')}đ vào ${categoryName || 'giao dịch'} ✅`;
+      let confirmText = `Đã ghi nhận ${Number(amount).toLocaleString('vi-VN')}đ vào ${categoryName || 'giao dịch'} ✅`;
+      if (warningMessage) {
+        confirmText += `\n\n⚠️ ${warningMessage}`;
+      }
       await chatMessageModel.addMessage({ userId, role: 'assistant', content: confirmText });
 
       return sendSuccess(res, { transaction: created, confirmText }, 'Giao dịch đã được tạo thành công', 201);

@@ -106,15 +106,15 @@ async function createTransactionCore({ userId, categoryId, type, amount, transac
     err.statusCode = 400; throw err;
   }
 
-  // --- Strict Budget Enforcement: Must have a budget for expense categories ---
+  // --- Budget Check: If no budget, we still allow it but return a warning ---
+  let warningMessage = null;
   if (type === 'expense') {
     const month = transactionDate.slice(0, 7); // Extract YYYY-MM
     // budgetModel.getBudgetsByMonth returns all expense categories and attaches is_budgeted boolean
     const budgets = await budgetModel.getBudgetsByMonth({ userId, month });
     const hasBudget = budgets.find(b => b.category_id === Number(categoryId) && b.is_budgeted === true);
     if (!hasBudget) {
-      const err = new Error(`Vui lòng thiết lập hạn mức ngân sách cho danh mục "${category.name}" trước khi ghi nhận chi tiêu.`);
-      err.statusCode = 400; throw err;
+      warningMessage = `Ghi nhận thành công. Vui lòng thiết lập hạn mức ngân sách cho danh mục "${category.name}" nhé!`;
     }
   }
 
@@ -132,14 +132,14 @@ async function createTransactionCore({ userId, categoryId, type, amount, transac
 
   const created = await transactionModel.findById(newId, userId);
   await triggerStaleCheck(userId);
-  return created;
+  return { created, warningMessage };
 }
 
 async function createTransaction(req, res, next) {
   try {
     const { categoryId, type, amount, transactionDate, note, merchant } = req.body;
     // express-validator already ran for this route — just call the shared core
-    const created = await createTransactionCore({
+    const { created, warningMessage } = await createTransactionCore({
       userId: req.user.id,
       categoryId,
       type,
@@ -149,7 +149,8 @@ async function createTransaction(req, res, next) {
       merchant,
       nguon: 'manual'
     });
-    return sendSuccess(res, { transaction: created }, 'Tạo giao dịch thành công!', 201);
+    const msg = warningMessage || 'Tạo giao dịch thành công!';
+    return sendSuccess(res, { transaction: created, warning: !!warningMessage }, msg, 201);
   } catch (err) {
     if (err.statusCode) return sendError(res, err.message, err.statusCode);
     next(err);
@@ -174,13 +175,14 @@ async function updateTransaction(req, res, next) {
       return sendError(res, 'Danh mục được chọn không hợp lệ', 400);
     }
 
-    // --- Strict Budget Enforcement on Update ---
+    // --- Budget Check: If no budget, we still allow it but return a warning ---
+    let warningMessage = null;
     if (type === 'expense') {
       const month = transactionDate.slice(0, 7);
       const budgets = await budgetModel.getBudgetsByMonth({ userId: req.user.id, month });
       const hasBudget = budgets.find(b => b.category_id === Number(categoryId) && b.is_budgeted === true);
       if (!hasBudget) {
-        return sendError(res, `Vui lòng thiết lập hạn mức ngân sách cho danh mục "${catExists.name}" trước khi ghi nhận chi tiêu.`, 400);
+        warningMessage = `Cập nhật thành công. Vui lòng thiết lập hạn mức ngân sách cho danh mục "${catExists.name}" nhé!`;
       }
     }
 
@@ -200,7 +202,8 @@ async function updateTransaction(req, res, next) {
     // Trigger AI insight cache stale check
     await triggerStaleCheck(req.user.id);
 
-    return sendSuccess(res, null, 'Cập nhật giao dịch thành công!');
+    const msg = warningMessage || 'Cập nhật giao dịch thành công!';
+    return sendSuccess(res, { warning: !!warningMessage }, msg);
   } catch (err) {
     next(err);
   }
