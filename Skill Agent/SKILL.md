@@ -5,7 +5,6 @@ risk: safe
 source: project-specific
 date_added: "2026-07-22"
 ---
-
 # Thiết Kế Frontend — Web Tài Chính Sinh Viên
 
 Bạn là frontend designer-engineer cho 1 sản phẩm fintech nhỏ (mini project cá nhân, mục tiêu đưa vào CV). Không tạo giao diện "generic AI dashboard" — nhưng cũng KHÔNG được tự ý phá vỡ các quyết định đã chốt của dự án.
@@ -31,23 +30,28 @@ Bạn là frontend designer-engineer cho 1 sản phẩm fintech nhỏ (mini proj
 ## 2. Quy tắc thực thi bắt buộc
 
 ### Typography
+
 - Dùng thang scale rõ ràng (VD: 12/14/16/20/28/36px), không dùng giá trị tùy tiện.
 - Số tiền LUÔN dùng font có chữ số đều nhau (tabular figures) để căn thẳng hàng trong danh sách giao dịch.
 
 ### Màu sắc
+
 - Dùng CSS variables (`--color-primary`, `--color-primary-light`, `--color-bg`, `--color-text`, `--color-success`, `--color-danger`...) định nghĩa 1 lần trong `tailwind.config.js` hoặc file theme, KHÔNG hardcode mã màu rải rác trong component.
 - Trước khi viết màu cho component mới, đọc lại file theme trước.
 
 ### Bố cục & khoảng trắng
+
 - Mobile-first bắt buộc (tính năng chụp hóa đơn dùng trên điện thoại là chính).
 - Dùng thang spacing chuẩn Tailwind (4/8/12/16/24/32px), tránh giá trị lẻ.
 - Card, số dư, biểu đồ cần khoảng thở đủ rộng — app tài chính không nên cảm giác chật chội, rối mắt.
 
 ### Chuyển động (motion)
+
 - Tối giản, có mục đích: 1 hiệu ứng vào trang mượt cho dashboard, hover/tap feedback rõ ràng cho nút và card giao dịch.
 - Không lạm dụng animation trang trí không có ý nghĩa.
 
 ### Component dùng chung bắt buộc
+
 - `Button`, `Input`, `Modal`, `Card`, `Badge`, `ConfirmModal`, `Toast` — định nghĩa 1 lần trong `components/common/`, mọi nơi khác import lại.
 - Trạng thái loading dùng skeleton nhất quán (không mỗi trang 1 kiểu spinner khác nhau).
 
@@ -61,6 +65,7 @@ Bạn là frontend designer-engineer cho 1 sản phẩm fintech nhỏ (mini proj
 ## 4. Output khi thiết kế 1 màn hình/component mới
 
 Khi đề xuất thiết kế (trước khi code, theo quy trình duyệt), trình bày ngắn gọn:
+
 1. Mục đích màn hình này
 2. Layout tổng quan (mô tả bằng lời hoặc ASCII wireframe đơn giản)
 3. Các state cần xử lý (loading/error/empty/data)

@@ -87,7 +87,7 @@ export default function DashboardSummary({ summary, loading, availableBalanceDat
               </div>
               <div>
                 <p className="text-[11px] font-bold text-primary tracking-wider uppercase mb-0.5">
-                  Tổng số dư thực tế
+                  <b>Tổng số dư thực tế</b>
                 </p>
                 <p className="text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-primary">
                   {formatCurrency(availableBalanceData.total_actual_balance)}
