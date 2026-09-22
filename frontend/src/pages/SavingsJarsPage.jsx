@@ -131,17 +131,17 @@ export default function SavingsJarsPage() {
   const displayJars = activeTab === 'active' ? activeJars : activeTab === 'completed' ? completedJars : archivedJars;
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+    <div className="app-page">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-maintext flex items-center gap-2">
-              <PiggyBank className="w-7 h-7 text-primary" />
-              Hũ Tiết Kiệm
-            </h1>
-            <p className="text-sm text-neutral-subtext mt-1">Khóa tiền cho các mục tiêu tương lai, không tính vào chi tiêu.</p>
+      <main id="main-content" className="app-main animate-fadeIn">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-8">
+          <div className="flex items-start gap-3.5">
+            <div className="page-icon"><PiggyBank className="w-6 h-6" /></div>
+            <div>
+            <h1 className="page-title">Hũ tiết kiệm</h1>
+            <p className="page-description">Dành riêng từng khoản tiền cho các mục tiêu tương lai.</p>
+            </div>
           </div>
           <Button variant="primary" icon={Plus} onClick={handleOpenCreate} className="w-full md:w-auto shadow-md shadow-primary/20">
             Tạo hũ mới
@@ -196,7 +196,7 @@ export default function SavingsJarsPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-3xl border border-neutral-border border-dashed">
+          <div className="text-center py-20 bg-white/80 rounded-[1.75rem] border border-neutral-border border-dashed shadow-xs">
             <div className="w-16 h-16 bg-neutral-bg rounded-full flex items-center justify-center mx-auto mb-4">
               <PiggyBank className="w-8 h-8 text-neutral-subtext" />
             </div>

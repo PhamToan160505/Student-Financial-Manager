@@ -249,7 +249,7 @@ export default function TransactionModal({
                   >
                     <div
                       className="w-8 h-8 rounded-xl flex items-center justify-center text-base shrink-0"
-                      style={{ backgroundColor: `${cat.color || '#2563EB'}20` }}
+                      style={{ backgroundColor: `${cat.color || '#176B5B'}20` }}
                     >
                       {emoji}
                     </div>

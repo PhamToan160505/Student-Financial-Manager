@@ -1,34 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
 :root {
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-primary-dark: #1E40AF;
-  --color-primary-light: #EFF6FF;
-  --color-success: #16A34A;
-  --color-success-light: #F0FDF4;
-  --color-danger: #DC2626;
-  --color-danger-light: #FEF2F2;
-  --color-warning: #F59E0B;
-  --color-warning-dark: #B45309;
-  --color-warning-darker: #9A3412;
-  --color-warning-light: #FEF3C7;
-  --color-neutral-border: #E5E7EB;
-  --color-neutral-subtext: #4B5563;
-  --color-neutral-maintext: #111827;
-  --color-neutral-bg: #F9FAFB;
+  color-scheme: light;
+  --color-primary: #176b5b;
+  --color-primary-hover: #10594b;
+  --color-primary-dark: #0c463c;
+  --color-primary-light: #e8f3ef;
+  --color-success: #23845f;
+  --color-success-light: #eaf6f0;
+  --color-danger: #c0524e;
+  --color-danger-light: #faeeec;
+  --color-warning: #d39a38;
+  --color-warning-dark: #98691c;
+  --color-warning-darker: #734c11;
+  --color-warning-light: #fbf2dd;
+  --color-neutral-border: #dde4de;
+  --color-neutral-subtext: #60716a;
+  --color-neutral-maintext: #14231e;
+  --color-neutral-bg: #f4f2ec;
+  --surface: #fffdfa;
+  --surface-muted: #eef0ea;
+  --shadow-color: 20 35 30;
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    background: var(--color-neutral-bg);
+  }
+
   body {
     @apply bg-neutral-bg text-neutral-maintext antialiased font-sans;
     margin: 0;
     padding: 0;
+    min-width: 320px;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 8% 0%, rgba(23, 107, 91, 0.07), transparent 24rem),
+      radial-gradient(circle at 96% 18%, rgba(211, 154, 56, 0.05), transparent 22rem);
+    background-attachment: fixed;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  [role='button'],
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    color: var(--color-primary-dark);
+    background: rgba(23, 107, 91, 0.18);
+  }
+
+  :focus-visible {
+    outline: 3px solid rgba(23, 107, 91, 0.25);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  input[type='number'],
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .app-page {
+    min-height: 100dvh;
+    color: var(--color-neutral-maintext);
+  }
+
+  .app-main {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: 2rem 1rem 7.5rem;
+  }
+
+  .page-title {
+    font-size: clamp(1.55rem, 2vw, 2rem);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    color: var(--color-neutral-maintext);
+  }
+
+  .page-description {
+    max-width: 42rem;
+    margin-top: 0.4rem;
+    color: var(--color-neutral-subtext);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .page-icon {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 0.9rem;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    box-shadow: inset 0 0 0 1px rgba(23, 107, 91, 0.08);
+  }
+
+  @media (min-width: 640px) {
+    .app-main { padding: 2.5rem 1.5rem 5rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .app-main { padding-inline: 2rem; }
   }
 }
 
 @layer utilities {
+  .animate-fadeIn,
+  .animate-fade-in {
+    /* `backwards` applies the entry state only before/during animation.
+       Keeping the final transform with `both` creates a containing block and
+       incorrectly traps fixed modals inside the page container. */
+    animation: page-in 480ms cubic-bezier(.22, 1, .36, 1) backwards;
+  }
+
+  .surface-highlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .surface-highlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), transparent 45%);
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -36,4 +169,27 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: rgba(96, 113, 106, 0.42);
+  background-clip: padding-box;
 }

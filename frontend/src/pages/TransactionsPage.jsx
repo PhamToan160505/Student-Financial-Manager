@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { useCategories } from '../hooks/useCategories';
-import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Navbar from '../components/common/Navbar';
 import ConfirmModal from '../components/common/ConfirmModal';
 import QuickAddChips from '../components/transaction/QuickAddChips';
-import StreakBadge from '../components/transaction/StreakBadge';
 import TransactionFilter from '../components/transaction/TransactionFilter';
 import TransactionItem from '../components/transaction/TransactionItem';
 import TransactionCalendar from '../components/transaction/TransactionCalendar';
@@ -15,13 +13,12 @@ import DailyDetailsModal from '../components/transaction/DailyDetailsModal';
 import ReceiptUploadModal from '../components/transaction/ReceiptUploadModal';
 import { useStreak } from '../hooks/useStreak';
 import {
-  Plus, ArrowLeftRight, RefreshCw, AlertCircle, Calendar, List, Camera, Sparkles
+  Plus, ArrowLeftRight, RefreshCw, AlertCircle, Sparkles
 } from 'lucide-react';
 
 export default function TransactionsPage() {
   const {
     transactions,
-    summary,
     groupedByDate,
     loading: txLoading,
     error: txError,
@@ -80,20 +77,20 @@ export default function TransactionsPage() {
   const loading = txLoading || catLoading;
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+    <div className="app-page">
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="space-y-6">
+      <main id="main-content" className="app-main animate-fadeIn">
+        <div className="space-y-7">
           {/* Page Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-                <ArrowLeftRight className="w-5 h-5 text-primary" />
-                Sổ Thu Chi
-              </h2>
-              <p className="text-sm text-neutral-subtext mt-0.5">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="flex items-start gap-3.5">
+              <div className="page-icon"><ArrowLeftRight className="w-5 h-5" /></div>
+              <div>
+              <h1 className="page-title">Sổ thu chi</h1>
+              <p className="page-description">
                 Nhật ký theo dõi các khoản chi tiêu và thu nhập hàng ngày
               </p>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -121,24 +118,22 @@ export default function TransactionsPage() {
           </div>
 
           {/* Quick-add section */}
-          <div className="bg-white p-3 rounded-2xl border border-neutral-border shadow-sm">
-            <QuickAddChips 
-              refreshTrigger={transactions}
-              onSelectTemplate={(tpl) => {
-                setPrefillData({
-                  category_id: tpl.categoryId,
-                  amount: '',
-                  note: '',
-                  type: 'expense'
-                });
-                setPrefilledDate(new Date().toISOString().slice(0, 10));
-                setShowCreateModal(true);
-              }} 
-            />
-          </div>
+          <QuickAddChips 
+            refreshTrigger={transactions}
+            onSelectTemplate={(tpl) => {
+              setPrefillData({
+                category_id: tpl.categoryId,
+                amount: '',
+                note: '',
+                type: 'expense'
+              });
+              setPrefilledDate(new Date().toISOString().slice(0, 10));
+              setShowCreateModal(true);
+            }} 
+          />
 
           {/* Combined Filter & Content Container */}
-          <div className="bg-white rounded-2xl border border-neutral-border shadow-sm overflow-hidden">
+          <div className="bg-white/90 rounded-[1.35rem] border border-white/80 shadow-sm overflow-hidden">
             {/* Filter & View Mode Switcher */}
             <TransactionFilter
               filters={filters}

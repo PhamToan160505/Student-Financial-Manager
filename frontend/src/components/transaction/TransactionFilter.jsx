@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Calendar as CalendarIcon, List, Filter, X } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, List, X } from 'lucide-react';
 import MonthPicker from '../common/MonthPicker';
 
 import StreakBadge from './StreakBadge';

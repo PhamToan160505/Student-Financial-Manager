@@ -1,141 +1,124 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../controllers/useAuth';
-import Button from './Button';
 import ProfileModal from './ProfileModal';
 import {
-  Wallet, LogOut, UserCheck, Tag, LayoutDashboard,
+  Wallet, LogOut, Tag, LayoutDashboard,
   ArrowLeftRight, PieChart, PiggyBank
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, disabled: false },
-  { id: 'transactions', label: 'Sổ thu chi', icon: ArrowLeftRight, disabled: false },
-  { id: 'budget', label: 'Ngân sách', icon: PieChart, disabled: false },
-  { id: 'savings', label: 'Tiết kiệm', icon: PiggyBank, disabled: false },
-  { id: 'category', label: 'Danh mục', icon: Tag, disabled: false },
+  { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { id: 'transactions', label: 'Thu chi', icon: ArrowLeftRight },
+  { id: 'budget', label: 'Ngân sách', icon: PieChart },
+  { id: 'savings', label: 'Tiết kiệm', icon: PiggyBank },
+  { id: 'category', label: 'Danh mục', icon: Tag },
 ];
 
-/**
- * Shared Navbar Component - Enforces a single unified active tab style (filled pill)
- * across all pages: Dashboard, Transactions, Categories, and Budget.
- */
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const activePage = location.pathname.split('/')[1] || 'dashboard';
+  const userInitial = user?.fullName?.trim()?.charAt(0)?.toUpperCase() || 'U';
 
   return (
     <>
       <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
-      <header className="bg-white border-b border-neutral-border sticky top-0 z-40 shadow-2xs">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-2">
-            {/* Logo & App Title */}
-            <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/dashboard')}>
-              <div className="p-2 bg-primary rounded-xl text-white shadow-sm shadow-primary/30 shrink-0">
-                <Wallet className="w-5 h-5" />
-              </div>
-              <div className="hidden lg:block whitespace-nowrap">
-                <p className="text-sm font-bold text-neutral-maintext leading-tight">Tài Chính Sinh Viên</p>
-                <p className="text-[11px] text-neutral-subtext leading-tight">Student Financial Manager</p>
-              </div>
-            </div>
+      <header className="sticky top-0 z-40 border-b border-neutral-border/70 bg-neutral-bg/80 backdrop-blur-xl supports-[backdrop-filter]:bg-neutral-bg/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-[68px] items-center justify-between gap-3">
+            <button
+              type="button"
+              className="group flex shrink-0 items-center gap-3 rounded-xl text-left focus-visible:outline-none"
+              onClick={() => navigate('/dashboard')}
+              aria-label="Về trang tổng quan"
+            >
+              <span className="relative grid h-10 w-10 place-items-center rounded-[14px] bg-primary text-white shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
+                <Wallet className="h-5 w-5" strokeWidth={2.2} />
+                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-bg bg-warning" />
+              </span>
+              <span className="hidden lg:block whitespace-nowrap">
+                <span className="block text-[15px] font-extrabold leading-tight tracking-[-0.03em] text-neutral-maintext">Ví Sinh Viên</span>
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-subtext">Quản lý tài chính</span>
+              </span>
+            </button>
 
-            {/* Navigation Tabs - Enforcing Unified Filled Pill Active Style */}
-            <nav className="hidden md:flex items-center justify-center flex-1 gap-1 mx-2 overflow-x-auto no-scrollbar">
-              {NAV_ITEMS.map(item => {
-                const isActive = activePage === item.id;
+            <nav className="hidden md:flex items-center justify-center gap-1 rounded-2xl border border-white/80 bg-white/60 p-1.5 shadow-xs" aria-label="Điều hướng chính">
+              {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+                const isActive = activePage === id;
                 return (
                   <button
-                    key={item.id}
-                    onClick={() => !item.disabled && navigate(`/${item.id}`)}
-                    disabled={item.disabled}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm transition-all duration-200 cursor-pointer shrink-0 ${
+                    key={id}
+                    type="button"
+                    onClick={() => navigate(`/${id}`)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold transition-all duration-200 lg:px-4 ${
                       isActive
-                        ? 'bg-primary-light text-primary font-bold shadow-2xs'
-                        : item.disabled
-                          ? 'text-neutral-border cursor-not-allowed'
-                          : 'text-neutral-subtext hover:bg-neutral-bg hover:text-neutral-maintext font-medium'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-neutral-subtext hover:bg-white hover:text-neutral-maintext'
                     }`}
-                    title={item.disabled ? 'Sắp ra mắt...' : item.label}
                   >
-                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-neutral-subtext'}`} />
-                    <span className="whitespace-nowrap">{item.label}</span>
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={isActive ? 2.4 : 2} />
+                    <span className="whitespace-nowrap">{label}</span>
                   </button>
                 );
               })}
             </nav>
 
-            {/* User Info & Logout Button */}
-            <div className="flex items-center gap-3 md:gap-5 shrink-0">
-              {/* User Profile */}
-              <div 
-                className="flex items-center gap-2.5 cursor-pointer hover:bg-neutral-bg/50 p-1 -m-1 rounded-xl transition-colors"
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <button
+                type="button"
                 onClick={() => setIsProfileOpen(true)}
+                className="flex items-center gap-2.5 rounded-xl p-1.5 pr-2 transition-colors hover:bg-white/70"
                 title="Xem hồ sơ cá nhân"
               >
-                <div className="w-9 h-9 rounded-full bg-primary-light/50 flex items-center justify-center shrink-0 border border-primary/20 overflow-hidden">
-                  {/* Avatar */}
+                <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[13px] border border-primary/15 bg-primary-light text-sm font-bold text-primary">
                   {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt={user?.fullName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-primary font-bold text-sm">
-                      {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
-                  )}
-                </div>
-                <div className="block text-left max-w-[120px] sm:max-w-[130px] md:max-w-[180px]">
-                  <p className="text-sm font-semibold text-neutral-maintext truncate" title={user?.fullName}>
-                    {user?.fullName}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-neutral-subtext truncate" title={user?.email}>
-                    {user?.email}
-                  </p>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="w-px h-8 bg-neutral-border hidden sm:block shrink-0"></div>
-
-              {/* Logout Button */}
-              <Button
-                variant="ghost"
-                size="sm"
+                    <img src={user.avatar_url} alt={`Ảnh đại diện của ${user?.fullName || 'người dùng'}`} className="h-full w-full object-cover" />
+                  ) : userInitial}
+                </span>
+                <span className="hidden max-w-[150px] text-left xl:block">
+                  <span className="block truncate text-xs font-bold text-neutral-maintext">{user?.fullName || 'Tài khoản'}</span>
+                  <span className="block truncate text-[10px] text-neutral-subtext">{user?.email}</span>
+                </span>
+              </button>
+              <span className="hidden h-7 w-px bg-neutral-border sm:block" />
+              <button
+                type="button"
                 onClick={logout}
-                className="text-danger hover:bg-danger-light hover:text-danger cursor-pointer shrink-0 !px-2"
+                className="grid h-9 w-9 place-items-center rounded-xl text-neutral-subtext transition-all hover:bg-danger-light hover:text-danger active:scale-95"
                 title="Đăng xuất"
+                aria-label="Đăng xuất"
               >
-                <LogOut className="w-5 h-5" />
-              </Button>
+                <LogOut className="h-[18px] w-[18px]" />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-border z-40 shadow-lg">
-        <div className="flex items-center justify-around py-1.5 px-2">
-          {NAV_ITEMS.map(item => {
-            const isActive = activePage === item.id;
+      <nav
+        className="fixed inset-x-3 bottom-3 z-40 rounded-[1.35rem] border border-white/80 bg-white/90 px-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur-xl md:hidden"
+        aria-label="Điều hướng di động"
+      >
+        <div className="grid grid-cols-5 gap-0.5">
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+            const isActive = activePage === id;
             return (
               <button
-                key={item.id}
-                onClick={() => !item.disabled && navigate(`/${item.id}`)}
-                disabled={item.disabled}
-                className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl text-xs transition-all ${
-                  isActive
-                    ? 'bg-primary-light text-primary font-bold'
-                    : item.disabled
-                      ? 'text-neutral-border'
-                      : 'text-neutral-subtext font-medium'
+                key={id}
+                type="button"
+                onClick={() => navigate(`/${id}`)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex min-w-0 flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-semibold transition-all ${
+                  isActive ? 'bg-primary-light text-primary' : 'text-neutral-subtext hover:bg-neutral-bg'
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                <span>{item.label}</span>
+                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+                <span className="w-full truncate px-0.5">{label}</span>
               </button>
             );
           })}

@@ -12,7 +12,7 @@ export default function ChatBubbleButton({ onClick, isOpen }) {
     <button
       onClick={onClick}
       aria-label="Mở Trợ lý AI Cố vấn Tài chính"
-      className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 group flex items-center gap-2.5 bg-primary hover:bg-primary-hover text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 border-2 border-white/20"
+      className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-40 group flex items-center gap-2.5 bg-primary-dark hover:bg-primary-hover text-white px-4 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 border border-white/15 active:scale-[0.98]"
     >
       <div className="relative flex items-center justify-center">
         <MessageSquare className="w-5 h-5 text-white shrink-0" />

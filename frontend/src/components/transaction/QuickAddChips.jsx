@@ -18,15 +18,11 @@ export default function QuickAddChips({ onSelectTemplate, refreshTrigger }) {
   }
 
   if (templates.length === 0) {
-    return (
-      <div className="text-xs text-neutral-subtext italic bg-neutral-bg px-3 py-2 rounded-xl inline-block">
-        Hãy ghi thêm giao dịch, ứng dụng sẽ tự học thói quen chi tiêu của bạn!
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
       <div className="flex items-center gap-1.5 text-xs font-bold text-primary shrink-0 mr-1">
         <Zap className="w-4 h-4 fill-primary" />
         Ghi nhanh:
@@ -35,7 +31,7 @@ export default function QuickAddChips({ onSelectTemplate, refreshTrigger }) {
         <button
           key={idx}
           onClick={() => onSelectTemplate(tpl)}
-          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-border rounded-full text-xs font-semibold hover:border-primary hover:text-primary hover:bg-primary-light transition-colors shadow-sm"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white/70 border border-neutral-border/70 rounded-xl text-xs font-semibold hover:border-primary/30 hover:text-primary hover:bg-primary-light transition-colors"
           title={`Gợi ý: ${tpl.suggestedNote || 'Không có ghi chú'}`}
         >
           <span className="flex items-center gap-1.5">

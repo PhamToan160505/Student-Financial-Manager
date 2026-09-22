@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Wallet, PieChart, ArrowUpRight } from 'lucide-react';
+import { Wallet, PieChart, ArrowUpRight } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
 import BudgetWarningBanner from './BudgetWarningBanner';
 
@@ -33,7 +33,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
       {/* 2. Overview KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Budget Card */}
-        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white/90 p-5 rounded-[1.35rem] border border-white/80 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-subtext mb-2">
             <span className="text-sm font-medium">Tổng hạn mức thiết lập</span>
             <div className="p-2 rounded-xl bg-primary-light text-primary">
@@ -51,9 +51,9 @@ export default function BudgetSummary({ summary, warnings, loading }) {
         </div>
 
         {/* Total Spent in Budget Card */}
-        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white/90 p-5 rounded-[1.35rem] border border-white/80 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-subtext mb-2">
-            <span className="text-sm font-medium">Đã chi TÍNH ĐẾN HÔM NAY</span>
+            <span className="text-sm font-medium">Đã chi đến hôm nay</span>
             <div className={`p-2 rounded-xl ${
               percentOverall > 100 ? 'bg-danger-light text-danger' : percentOverall >= 80 ? 'bg-warning-light text-warning-dark' : 'bg-primary-light text-primary'
             }`}>
@@ -88,7 +88,7 @@ export default function BudgetSummary({ summary, warnings, loading }) {
         </div>
 
         {/* Remaining Card */}
-        <div className="bg-white p-4.5 rounded-2xl border border-neutral-border shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white/90 p-5 rounded-[1.35rem] border border-white/80 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-subtext mb-2">
             <span className="text-sm font-medium">Ngân sách còn lại</span>
             <div className={`p-2 rounded-xl ${remaining < 0 ? 'bg-danger-light text-danger' : 'bg-success-light text-success'}`}>

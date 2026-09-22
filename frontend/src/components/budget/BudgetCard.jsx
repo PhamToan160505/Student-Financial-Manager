@@ -9,7 +9,7 @@ import { getCategoryEmoji } from '../../utils/emoji';
  */
 export default function BudgetCard({ item, onEdit, onDelete }) {
   const emoji = getCategoryEmoji(item.category_icon);
-  const color = item.category_color || '#2563EB';
+  const color = item.category_color || '#176B5B';
 
   // If budget limit has NOT been set yet for this category
   if (!item.is_budgeted) {

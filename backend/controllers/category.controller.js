@@ -46,10 +46,10 @@ async function createCategory(req, res, next) {
 async function updateCategory(req, res, next) {
   try {
     const { id } = req.params;
-    const { name, icon, color } = req.body;
+      const { name, icon, color } = req.body;
 
-    // Check ownership first — prevents IDOR
-    const existing = await categoryModel.findByIdAndUserId(id, req.user.id);
+      // Check ownership first — prevents IDOR
+      const existing = await categoryModel.findByIdAndUserId(id, req.user.id);
     if (!existing) {
       return sendError(res, 'Không tìm thấy danh mục hoặc bạn không có quyền chỉnh sửa danh mục này', 404);
     }

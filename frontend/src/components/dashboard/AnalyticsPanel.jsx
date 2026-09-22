@@ -29,7 +29,14 @@ const BreakdownTooltip = ({ active, payload }) => {
 
 const TrendTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const formattedLabel = label ? `Tháng ${label.split('-')[1]}/${label.split('-')[0]}` : label;
+    const rawMonth = payload[0]?.payload?.month_str;
+    const monthMatch = typeof rawMonth === 'string' && rawMonth.match(/^(\d{4})-(\d{2})$/);
+    const shortMonthMatch = typeof label === 'string' && label.match(/^T(\d{1,2})$/);
+    const formattedLabel = monthMatch
+      ? `Tháng ${Number(monthMatch[2])}/${monthMatch[1]}`
+      : shortMonthMatch
+        ? `Tháng ${Number(shortMonthMatch[1])}`
+        : 'Chi tiết theo tháng';
     const expenseItem = payload.find(p => p.dataKey === 'expense');
     const incomeItem = payload.find(p => p.dataKey === 'income');
 
@@ -141,7 +148,8 @@ export default function AnalyticsPanel({
   // Generate the 3-month window ending at selectedMonth ([month-2, month-1, selectedMonth])
   const now = new Date();
   const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const [selYearStr, selMonthStr] = (selectedMonth || fallbackMonth).split('-');
+  const safeSelectedMonth = /^\d{4}-\d{2}$/.test(selectedMonth || '') ? selectedMonth : fallbackMonth;
+  const [selYearStr, selMonthStr] = safeSelectedMonth.split('-');
   
   const monthList = [2, 1, 0].map(offset => {
     let y = Number(selYearStr);
@@ -156,7 +164,7 @@ export default function AnalyticsPanel({
   const formattedTrend = monthList.map(mStr => {
     const found = sixMonthTrend.find(item => item.month_str === mStr);
     const shortLabel = `T${Number(mStr.slice(5, 7))}`;
-    const isCurrent = mStr === selectedMonth;
+    const isCurrent = mStr === safeSelectedMonth;
 
     return {
       month_str: mStr,
@@ -170,7 +178,7 @@ export default function AnalyticsPanel({
   const hasTrendData = formattedTrend.some(d => d.income > 0 || d.expense > 0);
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-neutral-border shadow-sm">
+    <div className="bg-white/90 p-5 sm:p-6 rounded-[1.35rem] border border-white/80 shadow-sm">
       {/* 1. Header Khối + Pill Toggle (Chuẩn MoMo) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-border pb-4 mb-5">
         <div>
@@ -402,7 +410,7 @@ export default function AnalyticsPanel({
                     {formattedTrend.map((entry, index) => (
                       <Cell
                         key={`cell-exp-${index}`}
-                        fill={entry.isCurrent ? 'var(--color-primary, #2563EB)' : 'var(--color-primary-light, #93C5FD)'}
+                        fill={entry.isCurrent ? 'var(--color-primary, #176B5B)' : 'var(--color-primary-light, #A8D8CB)'}
                       />
                     ))}
                   </Bar>
@@ -417,7 +425,7 @@ export default function AnalyticsPanel({
             <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-neutral-border/60">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-md bg-primary shrink-0" />
-                <span className="text-xs font-bold text-neutral-maintext">Chi tiêu tháng {selectedMonth?.slice(5, 7)} (Hiện tại)</span>
+                <span className="text-xs font-bold text-neutral-maintext">Chi tiêu tháng {Number(selMonthStr)} (hiện tại)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-md bg-primary-light shrink-0" />

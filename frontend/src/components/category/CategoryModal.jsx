@@ -10,11 +10,11 @@ const TYPE_OPTIONS = [
 ];
 
 const COLOR_OPTIONS = [
-  '#2563EB', '#16A34A', '#DC2626', '#F97316',
-  '#8B5CF6', '#EC4899', '#06B6D4', '#D97706',
-  '#6B7280', '#10B981', '#EF4444', '#84CC16',
-  '#4F46E5', '#059669', '#E11D48', '#CA8A04',
-  '#0284C7', '#475569', '#9333EA', '#0D9488'
+  '#176B5B', '#3A7D6B', '#C0524E', '#C9773A',
+  '#71659A', '#B05D76', '#3D8290', '#B27A27',
+  '#66736E', '#23845F', '#B65A52', '#7E913F',
+  '#566A96', '#39745B', '#A64E68', '#A9822F',
+  '#3F778E', '#586965', '#795B8F', '#34796F'
 ];
 
 const ICON_OPTIONS = [
@@ -54,7 +54,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
     name: '',
     type: 'expense',
     icon: 'Tag',
-    color: '#2563EB'
+    color: '#176B5B'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -79,7 +79,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
           name: initialData.name || '',
           type: initialData.type || 'expense',
           icon: initialData.icon || 'Tag',
-          color: initialData.color || '#2563EB'
+          color: initialData.color || '#176B5B'
         });
       } else {
         const usedC = existingCategories.map(c => c.color.toLowerCase()).filter(c => c !== '#6b7280');

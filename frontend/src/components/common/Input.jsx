@@ -29,14 +29,14 @@ export default function Input({
       {(label || actionRight) && (
         <div className="flex items-center justify-between mb-1.5">
           {label && (
-            <label htmlFor={id} className="block text-sm font-medium text-neutral-maintext">
+            <label htmlFor={id} className="block text-[13px] font-semibold text-neutral-maintext">
               {label} {required && <span className="text-danger">*</span>}
             </label>
           )}
           {actionRight && <div>{actionRight}</div>}
         </div>
       )}
-      <div className="relative rounded-xl shadow-sm">
+      <div className="relative rounded-xl">
         {Icon && (
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-subtext">
             <Icon className="h-4 w-4" />
@@ -51,8 +51,8 @@ export default function Input({
           disabled={disabled}
           required={required}
           className={`block w-full rounded-xl border ${
-            error ? 'border-danger text-danger focus:ring-danger focus:border-danger' : 'border-neutral-border text-neutral-maintext focus:ring-primary focus:border-primary'
-          } ${Icon ? 'pl-10' : 'pl-4'} ${rightElement || isPassword ? 'pr-10' : 'pr-4'} py-2.5 text-sm bg-white placeholder-neutral-subtext/60 focus:outline-none focus:ring-2 transition-all disabled:bg-neutral-bg disabled:cursor-not-allowed`}
+            error ? 'border-danger text-danger focus:ring-danger/20 focus:border-danger' : 'border-neutral-border text-neutral-maintext hover:border-primary/30 focus:ring-primary/15 focus:border-primary'
+          } ${Icon ? 'pl-10' : 'pl-4'} ${rightElement || isPassword ? 'pr-10' : 'pr-4'} min-h-11 py-2.5 text-sm bg-white/85 placeholder-neutral-subtext/55 focus:outline-none focus:ring-[3px] transition-all duration-200 disabled:bg-neutral-bg disabled:cursor-not-allowed`}
           {...props}
         />
         {(rightElement || isPassword) && (

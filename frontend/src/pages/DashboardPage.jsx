@@ -11,7 +11,7 @@ import AnalyticsPanel from '../components/dashboard/AnalyticsPanel';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import TransactionModal from '../components/transaction/TransactionModal';
 import MonthPicker from '../components/common/MonthPicker';
-import { LayoutDashboard, Calendar as CalendarIcon, RefreshCw, Plus, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Calendar as CalendarIcon, RefreshCw, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useBudget from '../hooks/useBudget';
 import BudgetWarningBanner from '../components/budget/BudgetWarningBanner';
@@ -43,25 +43,25 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+    <div className="app-page">
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="space-y-6 animate-fadeIn">
+      <main id="main-content" className="app-main animate-fadeIn">
+        <div className="space-y-7">
           {/* Page Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-                <LayoutDashboard className="w-5 h-5 text-primary" />
-                Trung Tâm Chỉ Huy Tài Chính
-              </h2>
-              <p className="text-sm text-neutral-subtext mt-0.5">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="flex items-start gap-3.5">
+              <div className="page-icon"><LayoutDashboard className="w-5 h-5" /></div>
+              <div>
+              <h1 className="page-title">Tổng quan tài chính</h1>
+              <p className="page-description">
                 Cái nhìn toàn cảnh về dòng tiền, tỷ trọng chi tiêu và sức khỏe tài chính
               </p>
+              </div>
             </div>
 
             {/* Month Selector + Actions */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-neutral-border shadow-xs">
+              <div className="flex min-h-10 items-center gap-2 bg-white/80 px-3.5 py-1.5 rounded-xl border border-white shadow-xs">
                 <CalendarIcon className="w-4 h-4 text-primary" />
                 <MonthPicker
                   value={month}

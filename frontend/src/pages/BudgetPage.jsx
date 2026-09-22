@@ -77,32 +77,28 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+    <div className="app-page">
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="space-y-6 animate-fadeIn pb-12">
+      <main id="main-content" className="app-main animate-fadeIn">
+        <div className="space-y-7">
           {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-neutral-border shadow-2xs">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-primary-light text-primary">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+            <div className="flex items-start gap-3.5">
+                <div className="page-icon">
               <PieChart className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-neutral-maintext tracking-tight">
-                Quản Lý Ngân Sách
-              </h1>
-              <p className="text-xs text-neutral-subtext">
+              <h1 className="page-title">Quản lý ngân sách</h1>
+              <p className="page-description">
                 Thiết lập hạn mức chi tiêu cho từng danh mục trong tháng
               </p>
             </div>
           </div>
-        </div>
 
         {/* Month Selector & Action */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Month Navigation */}
-          <div className="flex items-center bg-neutral-bg border border-neutral-border rounded-2xl p-1 shadow-2xs">
+          <div className="flex items-center bg-white/80 border border-white rounded-2xl p-1 shadow-xs">
             <button
               onClick={handlePrevMonth}
               className="p-1.5 rounded-xl hover:bg-white text-neutral-600 hover:text-neutral-maintext transition-all cursor-pointer"
@@ -150,7 +146,7 @@ export default function BudgetPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-neutral-maintext flex items-center gap-2">
-            <span>Danh sách Hạn Mức Chi Tiêu</span>
+            <span>Hạn mức chi tiêu</span>
             {!loading && (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary-light text-primary">
                 {budgets.length} danh mục

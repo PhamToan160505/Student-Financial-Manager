@@ -8,13 +8,13 @@ export default function RecentTransactions({ transactions = [], onNavigateToAll,
   const hasData = transactions.length > 0;
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-neutral-border shadow-sm flex flex-col justify-between h-full">
+    <div className="bg-white/90 p-5 sm:p-6 rounded-[1.35rem] border border-white/80 shadow-sm flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between border-b border-neutral-border pb-3 mb-3">
+        <div className="flex items-center justify-between border-b border-neutral-border/70 pb-4 mb-3">
           <div>
             <h3 className="text-base font-bold text-neutral-maintext flex items-center gap-2">
               <ArrowLeftRight className="w-4.5 h-4.5 text-primary" />
-              Giao Dịch Gần Đây
+              Giao dịch gần đây
             </h3>
             <p className="text-xs text-neutral-subtext mt-0.5">Các khoản thu chi mới được ghi nhận nhất</p>
           </div>
@@ -59,12 +59,12 @@ export default function RecentTransactions({ transactions = [], onNavigateToAll,
                 <div
                   key={tx.id}
                   onClick={onNavigateToAll}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-border hover:border-primary/40 hover:bg-neutral-bg/30 transition-all cursor-pointer group"
+                  className="flex items-center justify-between p-3 rounded-xl bg-transparent border border-transparent hover:border-primary/15 hover:bg-primary-light/35 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-xs"
-                      style={{ backgroundColor: `${tx.category_color || '#2563EB'}18` }}
+                      style={{ backgroundColor: `${tx.category_color || '#176B5B'}18` }}
                     >
                       {emoji}
                     </div>

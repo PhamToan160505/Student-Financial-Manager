@@ -27,7 +27,7 @@ export default function TransactionItem({ transaction, onEdit, onDelete }) {
       <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
         <div
           className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-sm"
-          style={{ backgroundColor: `${transaction.category_color || '#2563EB'}18` }}
+          style={{ backgroundColor: `${transaction.category_color || '#176B5B'}18` }}
         >
           {emoji}
         </div>

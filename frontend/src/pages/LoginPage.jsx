@@ -119,7 +119,7 @@ export default function LoginPage({ initialMode = 'login' }) {
       try {
         localStorage.setItem('rememberedEmail', formData.email);
         await rememberDevice();
-      } catch (err) {
+      } catch {
         toast.error('Lỗi khi lưu phiên đăng nhập');
       }
     } else {
@@ -264,26 +264,71 @@ export default function LoginPage({ initialMode = 'login' }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-bg via-white to-primary-light/40 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
-      <div className="max-w-md w-full">
-        {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary text-white rounded-2xl shadow-lg shadow-primary/20 mb-4 transform hover:scale-105 transition-transform duration-300">
-            <Wallet className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-maintext tracking-tight">
-            Quản Lý Tài Chính
-          </h1>
-          <p className="text-sm text-neutral-subtext mt-1 flex items-center justify-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span>Dành riêng cho sinh viên & freelancer</span>
-          </p>
-        </div>
+    <main id="main-content" className="min-h-[100dvh] overflow-x-hidden bg-neutral-bg p-3 sm:p-5 lg:p-6 font-sans">
+      <div className="mx-auto grid min-h-[calc(100dvh-1.5rem)] max-w-7xl overflow-hidden rounded-[2rem] bg-white/80 shadow-lg sm:min-h-[calc(100dvh-2.5rem)] lg:grid-cols-[1.08fr_.92fr]">
+        <section className="relative hidden overflow-hidden bg-primary-dark p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+          <div className="absolute -right-28 -top-28 h-96 w-96 rounded-full border-[70px] border-white/[0.035]" />
+          <div className="absolute -bottom-36 -left-20 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
 
-        {/* Auth Card */}
-        <Card className="shadow-xl border-neutral-border/80 p-0 overflow-hidden">
+          <div className="relative flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-primary-dark shadow-md">
+              <Wallet className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-extrabold tracking-[-0.03em]">Ví Sinh Viên</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Quản lý tài chính</p>
+            </div>
+          </div>
+
+          <div className="relative max-w-xl py-12">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-white/75">
+              <Sparkles className="h-3.5 w-3.5 text-warning" /> Thiết kế cho nhịp sống sinh viên
+            </div>
+            <h1 className="text-5xl font-extrabold leading-[1.08] tracking-[-0.055em] xl:text-6xl">
+              Hiểu tiền của bạn.<br /><span className="text-[#9DD2C4]">Sống nhẹ đầu hơn.</span>
+            </h1>
+            <p className="mt-6 max-w-lg text-base leading-7 text-white/65">
+              Theo dõi thu chi, đặt hạn mức và dành tiền cho mục tiêu — tất cả trong một không gian rõ ràng, riêng tư.
+            </p>
+
+            <div className="mt-9 grid max-w-lg grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-sm">
+                <ShieldCheck className="mb-3 h-5 w-5 text-[#9DD2C4]" />
+                <p className="text-sm font-bold">Dữ liệu riêng tư</p>
+                <p className="mt-1 text-xs leading-5 text-white/50">Thông tin tài chính chỉ thuộc về bạn.</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-sm">
+                <ArrowRight className="mb-3 h-5 w-5 text-warning" />
+                <p className="text-sm font-bold">Bắt đầu trong 1 phút</p>
+                <p className="mt-1 text-xs leading-5 text-white/50">Không cần thiết lập phức tạp.</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="relative text-xs text-white/40">Một quyết định nhỏ hôm nay tạo nên tự do ngày mai.</p>
+        </section>
+
+        <section className="flex min-w-0 items-center justify-center px-4 py-8 sm:px-10 lg:px-12 xl:px-16">
+          <div className="min-w-0 w-full max-w-md">
+            <div className="mb-7 flex items-center gap-3 lg:hidden">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-white shadow-sm"><Wallet className="h-5 w-5" /></div>
+              <div>
+                <p className="font-extrabold tracking-tight text-neutral-maintext">Ví Sinh Viên</p>
+                <p className="text-xs text-neutral-subtext">Tài chính cá nhân, thật dễ hiểu</p>
+              </div>
+            </div>
+
+            <div className="mb-7">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">Chào mừng trở lại</p>
+              <h2 className="text-[1.65rem] sm:text-3xl font-extrabold leading-[1.18] tracking-[-0.045em] text-neutral-maintext">
+                {authMode === 'register' ? 'Tạo tài khoản của bạn' : 'Tiếp tục hành trình tài chính'}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-subtext">Đăng nhập để xem dòng tiền và các mục tiêu của bạn.</p>
+            </div>
+
+        <Card className="min-w-0 w-full border-white/80 shadow-md" bodyClassName="!p-0">
           {(authMode === 'verify_otp' || authMode === 'forgot_otp') ? (
-            <div className="p-6 sm:p-8">
+              <div className="p-5 sm:p-7">
               <VerifyOtpForm 
                 email={formData.email} 
                 onVerify={handleVerifyOtp}
@@ -294,7 +339,7 @@ export default function LoginPage({ initialMode = 'login' }) {
               />
             </div>
           ) : authMode === 'forgot_email' ? (
-            <div className="p-6 sm:p-8">
+            <div className="p-5 sm:p-7">
               <h2 className="text-xl font-bold text-neutral-maintext mb-2 text-center">Quên mật khẩu</h2>
               <p className="text-sm text-neutral-subtext mb-6 text-center">Nhập email của bạn, chúng tôi sẽ gửi một mã OTP để khôi phục mật khẩu.</p>
               
@@ -321,7 +366,7 @@ export default function LoginPage({ initialMode = 'login' }) {
               </form>
             </div>
           ) : authMode === 'reset_password' ? (
-            <div className="p-6 sm:p-8">
+            <div className="p-5 sm:p-7">
               <h2 className="text-xl font-bold text-neutral-maintext mb-2 text-center">Tạo mật khẩu mới</h2>
               <form onSubmit={handleResetSubmit} className="space-y-5 mt-6" noValidate>
                 <div>
@@ -359,13 +404,13 @@ export default function LoginPage({ initialMode = 'login' }) {
           ) : (
             <>
               {/* Tab Selector */}
-              <div className="grid grid-cols-2 bg-neutral-bg/80 p-1.5 border-b border-neutral-border m-2 rounded-xl">
+              <div className="grid grid-cols-2 bg-neutral-bg/80 p-1.5 m-2 rounded-xl">
                 <button
                   type="button"
                   onClick={() => switchMode('login')}
                   className={`py-2 text-sm font-semibold rounded-lg transition-all ${
                     authMode === 'login'
-                      ? 'bg-white text-primary shadow-sm ring-1 ring-neutral-border/50'
+                      ? 'bg-white text-primary shadow-xs'
                       : 'text-neutral-subtext hover:text-neutral-maintext'
                   }`}
                 >
@@ -376,7 +421,7 @@ export default function LoginPage({ initialMode = 'login' }) {
                   onClick={() => switchMode('register')}
                   className={`py-2 text-sm font-semibold rounded-lg transition-all ${
                     authMode === 'register'
-                      ? 'bg-white text-primary shadow-sm ring-1 ring-neutral-border/50'
+                      ? 'bg-white text-primary shadow-xs'
                       : 'text-neutral-subtext hover:text-neutral-maintext'
                   }`}
                 >
@@ -385,7 +430,7 @@ export default function LoginPage({ initialMode = 'login' }) {
               </div>
 
               {/* Form Content */}
-              <div className="p-6 sm:p-8 pt-6">
+              <div className="p-5 sm:p-7 pt-5">
                 <form onSubmit={authMode === 'login' ? handleLoginSubmit : handleRegisterSubmit} className="space-y-5 animate-fade-in" noValidate>
                   {authMode === 'register' && (
                     <Input
@@ -489,7 +534,12 @@ export default function LoginPage({ initialMode = 'login' }) {
             </>
           )}
         </Card>
+            <p className="mt-6 text-center text-[11px] leading-5 text-neutral-subtext">
+              Bằng việc tiếp tục, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật.
+            </p>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

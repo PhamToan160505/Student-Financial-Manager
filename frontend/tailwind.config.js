@@ -8,35 +8,42 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#2563EB', // blue-600 - Main primary blue for buttons, links, charts
-          hover: '#1D4ED8',   // blue-700
-          dark: '#1E40AF',    // blue-800 - Important text/icon blue
-          light: '#EFF6FF',   // blue-50  - Subtle blue background
+          DEFAULT: '#176B5B',
+          hover: '#10594B',
+          dark: '#0C463C',
+          light: '#E8F3EF',
         },
         success: {
-          DEFAULT: '#16A34A', // green-600 - Income
-          light: '#F0FDF4',   // green-50
+          DEFAULT: '#23845F',
+          light: '#EAF6F0',
         },
         danger: {
-          DEFAULT: '#DC2626', // red-600 - Budget alert / Expense warning
-          light: '#FEF2F2',   // red-50
+          DEFAULT: '#C0524E',
+          light: '#FAEEEC',
         },
         warning: {
-          DEFAULT: '#F59E0B', // amber-500 - Budget warning (80-99%)
-          dark: '#B45309',    // amber-700 - WCAG AA compliant text contrast on light/white bg
-          darker: '#9A3412',  // orange-800 - High contrast warning text
-          light: '#FEF3C7',   // amber-100
+          DEFAULT: '#D39A38',
+          dark: '#98691C',
+          darker: '#734C11',
+          light: '#FBF2DD',
         },
         neutral: {
-          border: '#E5E7EB',  // gray-200 - Borders
-          subtext: '#4B5563', // gray-600 - Secondary text
-          maintext: '#111827',// gray-900 - Primary text (no pure black #000000)
-          bg: '#F9FAFB',      // gray-50 - App background contrast against white cards
+          border: '#DDE4DE',
+          subtext: '#60716A',
+          maintext: '#14231E',
+          bg: '#F4F2EC',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      }
+        sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['DM Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      boxShadow: {
+        xs: '0 1px 2px rgba(20, 35, 30, 0.04)',
+        sm: '0 8px 24px rgba(20, 35, 30, 0.06)',
+        md: '0 18px 45px rgba(20, 35, 30, 0.09)',
+        lg: '0 28px 80px rgba(20, 35, 30, 0.14)',
+      },
     },
   },
   plugins: [],

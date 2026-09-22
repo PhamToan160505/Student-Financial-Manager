@@ -28,7 +28,7 @@ function CategoryItem({ category, onEdit, onDelete }) {
         <div>
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-neutral-maintext">{category.name}</p>
-            {Boolean(category.is_default) ? (
+            {category.is_default ? (
               <Badge label="Mặc định" variant="primary" size="sm" />
             ) : null}
           </div>
@@ -36,7 +36,7 @@ function CategoryItem({ category, onEdit, onDelete }) {
       </div>
 
       {/* Actions only for user-created (non-default) categories */}
-      {!Boolean(category.is_default) ? (
+      {!category.is_default ? (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button variant="ghost" size="sm" icon={Pencil} onClick={() => onEdit(category)} title="Sửa" />
           <Button variant="ghost" size="sm" icon={Trash2} onClick={() => onDelete(category)} title="Xóa" className="text-danger hover:bg-danger-light hover:text-danger" />
@@ -96,21 +96,21 @@ export default function CategoriesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans pb-20">
+    <div className="app-page">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="space-y-6">
+      <main id="main-content" className="app-main !max-w-5xl animate-fadeIn">
+        <div className="space-y-7">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-maintext flex items-center gap-2">
-                <Tag className="w-5 h-5 text-primary" />
-                Quản lý Danh mục
-              </h2>
-              <p className="text-sm text-neutral-subtext mt-0.5">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="flex items-start gap-3.5">
+              <div className="page-icon"><Tag className="w-5 h-5" /></div>
+              <div>
+              <h1 className="page-title">Quản lý danh mục</h1>
+              <p className="page-description">
                 Phân loại thu nhập & chi tiêu của bạn
               </p>
+              </div>
             </div>
             <Button
               variant="primary"
