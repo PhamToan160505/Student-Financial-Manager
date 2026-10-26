@@ -74,7 +74,8 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Hồ sơ cá nhân" size="lg">
-      <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+      <div className="space-y-6 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Avatar Section */}
         <div className="flex flex-col items-center justify-center gap-3">
@@ -136,18 +137,21 @@ export default function ProfileModal({ isOpen, onClose }) {
           </p>
         </div>
 
-        <BankConnectionSection active={isOpen} />
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting}>
+              Hủy
+            </Button>
+            <Button variant="primary" type="submit" loading={isSubmitting}>
+              Lưu thay đổi
+            </Button>
+          </div>
+        </form>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting}>
-            Hủy
-          </Button>
-          <Button variant="primary" type="submit" loading={isSubmitting}>
-            Lưu thay đổi
-          </Button>
-        </div>
-      </form>
+        {/* Keep the bank form separate from the profile form. Nested forms cause
+            the browser to submit the profile instead of the bank connection. */}
+        <BankConnectionSection active={isOpen} />
+      </div>
     </Modal>
   );
 }
