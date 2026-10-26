@@ -475,3 +475,45 @@ npm run dev
 ```
 
 Ứng dụng sẽ tự động khởi tạo các bảng MySQL khi backend chạy lần đầu. Truy cập `http://localhost:5174` để sử dụng.
+
+---
+
+## 12. ĐỒNG BỘ GIAO DỊCH VIETINBANK QUA SEPAY
+
+Backend có endpoint webhook công khai `POST /api/webhooks/sepay`. Endpoint này dùng chữ ký HMAC-SHA256 của SePay, không dùng JWT người dùng.
+
+### 12.1. Cấu hình backend
+
+Tạo hai chuỗi bí mật khác nhau và thêm vào môi trường backend:
+
+```env
+SEPAY_WEBHOOK_SECRET=chuoi_bi_mat_giong_voi_cau_hinh_hmac_tren_sepay
+BANK_ACCOUNT_HASH_SECRET=chuoi_bi_mat_rieng_de_bam_so_tai_khoan
+```
+
+Có thể tạo chuỗi ngẫu nhiên bằng Node.js:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Không commit hai giá trị này lên Git. Khi deploy Render/Railway, thêm chúng trong phần Environment Variables của dịch vụ backend.
+
+### 12.2. Liên kết VietinBank với người dùng
+
+1. Đăng nhập web.
+2. Mở **Hồ sơ cá nhân → Đồng bộ VietinBank**.
+3. Nhập số tài khoản và tên gợi nhớ.
+
+Ứng dụng không lưu số tài khoản đầy đủ. Database chỉ giữ HMAC của số tài khoản và 4 số cuối để hiển thị.
+
+### 12.3. Cấu hình trên SePay
+
+1. Liên kết tài khoản VietinBank trong SePay và kiểm tra trạng thái đang hoạt động.
+2. Tạo webhook, chọn tài khoản VietinBank và loại giao dịch **Tất cả** để nhận cả tiền vào lẫn tiền ra.
+3. URL webhook: `https://TEN-MIEN-BACKEND/api/webhooks/sepay`.
+4. Phương thức xác thực: **HMAC-SHA256**.
+5. Secret Key: dùng đúng giá trị `SEPAY_WEBHOOK_SECRET` trên backend.
+6. Dùng chức năng gửi thử của SePay trước khi giao dịch thật.
+
+Khi nhận webhook hợp lệ, backend dùng `id` SePay để chống trùng, lưu payload đã che số tài khoản, rồi tạo giao dịch với nguồn `sepay_vietinbank`. Tiền ra được ghi là `expense`, tiền vào là `income`; giao dịch mới mặc định nằm trong danh mục “Khác” để người dùng phân loại lại.

@@ -7,6 +7,8 @@ const { testDbConnection } = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { sendSuccess } = require('./utils/response');
 const authRoutes = require('./routes/auth.routes');
+const bankAccountRoutes = require('./routes/bankAccount.routes');
+const sepayWebhookRoutes = require('./routes/sepayWebhook.routes');
 const categoryRoutes = require('./routes/category.routes');
 const transactionRoutes = require('./routes/transaction.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
@@ -24,6 +26,8 @@ const chatMessageModel = require('./models/chatMessage.model');
 const authModel = require('./models/auth.model');
 const savingsJarModel = require('./models/savingsJar.model');
 const jarTransactionModel = require('./models/jarTransaction.model');
+const bankAccountModel = require('./models/bankAccount.model');
+const bankWebhookEventModel = require('./models/bankWebhookEvent.model');
 
 const savingsJarRoutes = require('./routes/savingsJar.routes');
 
@@ -54,6 +58,11 @@ app.use(cors({
 }));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+// SePay HMAC is calculated from the exact request bytes, so this route must be
+// mounted before the global JSON parser changes the body into an object.
+app.use('/api/webhooks/sepay', express.raw({ type: 'application/json', limit: '100kb' }), sepayWebhookRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -69,6 +78,7 @@ app.get('/api/health', (req, res) => {
 
 // 3. Mount Routes (MVC pattern - Each resource has its own route file mounted here)
 app.use('/api/auth', authRoutes);
+app.use('/api/bank-accounts', verifyToken, bankAccountRoutes);
 app.use('/api/categories', verifyToken, categoryRoutes);
 app.use('/api/transactions', verifyToken, transactionRoutes);
 app.use('/api/dashboard', verifyToken, dashboardRoutes);
@@ -107,6 +117,8 @@ if (require.main === module) {
     await authModel.initTable();
     await savingsJarModel.initTable();
     await jarTransactionModel.initTable();
+    await bankAccountModel.initTable();
+    await bankWebhookEventModel.initTable();
     console.log(`==================================================`);
   });
 }

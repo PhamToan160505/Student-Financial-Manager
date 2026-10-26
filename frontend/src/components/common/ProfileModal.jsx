@@ -5,6 +5,7 @@ import Button from './Button';
 import { Camera, Mail, User, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../controllers/useAuth';
 import toast from 'react-hot-toast';
+import BankConnectionSection from './BankConnectionSection';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const { user, updateProfile } = useAuth();
@@ -72,7 +73,7 @@ export default function ProfileModal({ isOpen, onClose }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Hồ sơ cá nhân">
+    <Modal isOpen={isOpen} onClose={onClose} title="Hồ sơ cá nhân" size="lg">
       <form onSubmit={handleSubmit} className="space-y-6 mt-4">
         
         {/* Avatar Section */}
@@ -134,6 +135,8 @@ export default function ProfileModal({ isOpen, onClose }) {
             Hồ sơ của bạn được bảo mật an toàn. Ảnh đại diện sẽ được lưu trữ qua nền tảng Cloudinary tốc độ cao.
           </p>
         </div>
+
+        <BankConnectionSection active={isOpen} />
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-2">
