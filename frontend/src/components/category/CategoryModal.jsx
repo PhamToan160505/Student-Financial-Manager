@@ -9,6 +9,10 @@ const TYPE_OPTIONS = [
   { value: 'income', label: '💰 Thu nhập' }
 ];
 
+// Vietnamese letters, numbers, spaces and common separators used in category
+// names (for example: "Cà phê & trà", "Nhà / KTX").
+const CATEGORY_NAME_PATTERN = /^[\p{L}\p{M}\p{N}\s/&()+.,'-]+$/u;
+
 const COLOR_OPTIONS = [
   '#176B5B', '#3A7D6B', '#C0524E', '#C9773A',
   '#71659A', '#B05D76', '#3D8290', '#B27A27',
@@ -92,6 +96,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
   }, [isOpen, initialData, existingCategories]);
 
   const handleTypeChange = (newType) => {
+    setError('');
     // Uniqueness is global, so used colors/icons are the same regardless of type
     let newColor = form.color;
     if (usedColors.includes(newColor.toLowerCase())) {
@@ -113,11 +118,11 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
       setError('Vui lòng nhập tên danh mục');
       return;
     }
-    if (name.length < 5) {
-      setError('Tên danh mục phải từ 5 ký tự trở lên');
+    if (name.length > 100) {
+      setError('Tên danh mục tối đa 100 ký tự');
       return;
     }
-    if (!/^[a-zA-ZÀ-ỹ0-9\s]+$/.test(name)) {
+    if (!CATEGORY_NAME_PATTERN.test(name)) {
       setError('Tên danh mục không được chứa ký tự đặc biệt');
       return;
     }
@@ -147,7 +152,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
     setLoading(true);
     setError('');
     try {
-      await onSubmit(form);
+      await onSubmit({ ...form, name: form.name.trim() });
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
@@ -171,8 +176,12 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
           label="Tên danh mục"
           placeholder="VD: Cà phê buổi sáng..."
           value={form.name}
-          onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
+          onChange={(e) => {
+            setForm(p => ({ ...p, name: e.target.value }));
+            setError('');
+          }}
           error={error}
+          maxLength={100}
           required
         />
 
@@ -210,7 +219,10 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
                   key={c}
                   type="button"
                   disabled={isUsed}
-                  onClick={() => setForm(p => ({ ...p, color: c }))}
+                  onClick={() => {
+                    setForm(p => ({ ...p, color: c }));
+                    setError('');
+                  }}
                   className={`w-8 h-8 rounded-full transition-transform ${isUsed ? 'opacity-20 cursor-not-allowed' : 'hover:scale-110'} ${form.color === c ? 'ring-2 ring-offset-2 ring-neutral-maintext scale-110' : ''}`}
                   style={{ backgroundColor: c }}
                   title={c}
@@ -231,7 +243,10 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, initialData =
                   key={opt.name}
                   type="button"
                   disabled={isUsed}
-                  onClick={() => setForm(p => ({ ...p, icon: opt.name }))}
+                  onClick={() => {
+                    setForm(p => ({ ...p, icon: opt.name }));
+                    setError('');
+                  }}
                   className={`w-10 h-10 text-lg rounded-xl flex items-center justify-center transition-all ${isUsed ? 'opacity-20 cursor-not-allowed bg-neutral-bg' : 'hover:scale-110'} ${
                     form.icon === opt.name
                       ? 'ring-2 ring-offset-1 bg-primary-light'
