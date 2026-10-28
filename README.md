@@ -516,4 +516,14 @@ Không commit hai giá trị này lên Git. Khi deploy Render/Railway, thêm ch�
 5. Secret Key: dùng đúng giá trị `SEPAY_WEBHOOK_SECRET` trên backend.
 6. Dùng chức năng gửi thử của SePay trước khi giao dịch thật.
 
-Khi nhận webhook hợp lệ, backend dùng `id` SePay để chống trùng, lưu payload đã che số tài khoản, rồi tạo giao dịch với nguồn `sepay_vietinbank`. Tiền ra được ghi là `expense`, tiền vào là `income`; giao dịch mới mặc định nằm trong danh mục “Khác” để người dùng phân loại lại.
+Khi nhận webhook hợp lệ, backend dùng `id` SePay để chống trùng, lưu payload đã che số tài khoản, rồi tạo giao dịch với nguồn `sepay_vietinbank`. Tiền ra được ghi là `expense`, tiền vào là `income`.
+
+### 12.4. Phân loại tự động bằng mã chuyển khoản
+
+Trong **Hồ sơ cá nhân → Đồng bộ VietinBank → Mã phân loại tự động**, người dùng có thể tự gán một mã gồm chữ cái không dấu hoặc chữ số cho từng danh mục. Ví dụ:
+
+- `E` → Ăn uống
+- `DU` → Đồ uống
+- `XE` → Di chuyển
+
+Khi chuyển khoản, nhập nội dung `SEVQR E`, `SEVQR DU` hoặc `SEVQR XE`. Backend chỉ đọc mã nằm ngay sau `SEVQR`, nên mã ngắn như `E` không bị khớp nhầm với chữ trong nội dung khác. Mã không tồn tại hoặc trỏ tới danh mục khác loại giao dịch sẽ được lưu vào danh mục “Khác”.

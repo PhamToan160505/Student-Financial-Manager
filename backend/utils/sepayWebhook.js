@@ -101,6 +101,21 @@ function isVietinBankGateway(gateway) {
   return normalized === 'vietinbank' || normalized === 'icb';
 }
 
+function normalizeCategoryCode(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
+/**
+ * Read the first routing code immediately following the VietinBank-required
+ * SEVQR prefix. Examples: "SEVQR E" -> "E", "SEVQR-MUA1" -> "MUA1".
+ * Keeping this exact prevents a short code such as E matching ordinary text.
+ */
+function extractCategoryCode(value) {
+  const text = String(value || '').toUpperCase();
+  const match = text.match(/(?:^|\s)SEVQR(?:\s+|[-_:]+)([A-Z0-9]{1,20})(?=$|\s|[-_:.,;])/);
+  return match ? match[1] : '';
+}
+
 function sanitizePayload(payload) {
   return {
     ...payload,
@@ -133,5 +148,7 @@ module.exports = {
   verifySePaySignature,
   normalizeSePayPayload,
   isVietinBankGateway,
+  normalizeCategoryCode,
+  extractCategoryCode,
   sanitizePayload
 };

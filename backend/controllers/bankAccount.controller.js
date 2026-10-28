@@ -1,6 +1,8 @@
 const bankAccountModel = require('../models/bankAccount.model');
+const bankCategoryRuleModel = require('../models/bankCategoryRule.model');
+const categoryModel = require('../models/category.model');
 const { sendSuccess, sendError } = require('../utils/response');
-const { normalizeAccountNumber, hashAccountNumber } = require('../utils/sepayWebhook');
+const { normalizeAccountNumber, hashAccountNumber, normalizeCategoryCode } = require('../utils/sepayWebhook');
 
 const BANK_CODE = 'VIETINBANK';
 const BANK_NAME = 'VietinBank';
@@ -69,8 +71,58 @@ async function disconnectBankAccount(req, res, next) {
   }
 }
 
+async function getCategoryRules(req, res, next) {
+  try {
+    const rules = await bankCategoryRuleModel.findByUserId(req.user.id);
+    return sendSuccess(res, { rules }, 'Lấy quy tắc phân loại giao dịch thành công');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function saveCategoryRule(req, res, next) {
+  try {
+    const code = normalizeCategoryCode(req.body.code);
+    if (code === 'SEVQR') {
+      return sendError(res, 'Mã danh mục không được trùng với SEVQR', 400);
+    }
+
+    const categories = await categoryModel.findByUserId(req.user.id);
+    const category = categories.find(item => item.id === Number(req.body.categoryId));
+    if (!category) {
+      return sendError(res, 'Danh mục không tồn tại hoặc không thuộc tài khoản của bạn', 400);
+    }
+
+    const id = await bankCategoryRuleModel.upsert({
+      userId: req.user.id,
+      code,
+      categoryId: category.id
+    });
+    const rules = await bankCategoryRuleModel.findByUserId(req.user.id);
+    const rule = rules.find(item => item.id === id) || null;
+    return sendSuccess(res, { rule }, `Đã gán mã ${code} cho danh mục ${category.name}`, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteCategoryRule(req, res, next) {
+  try {
+    const affectedRows = await bankCategoryRuleModel.remove(req.params.id, req.user.id);
+    if (!affectedRows) {
+      return sendError(res, 'Không tìm thấy quy tắc phân loại', 404);
+    }
+    return sendSuccess(res, null, 'Đã xóa quy tắc phân loại');
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getBankAccounts,
   connectBankAccount,
-  disconnectBankAccount
+  disconnectBankAccount,
+  getCategoryRules,
+  saveCategoryRule,
+  deleteCategoryRule
 };

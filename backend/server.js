@@ -27,6 +27,7 @@ const authModel = require('./models/auth.model');
 const savingsJarModel = require('./models/savingsJar.model');
 const jarTransactionModel = require('./models/jarTransaction.model');
 const bankAccountModel = require('./models/bankAccount.model');
+const bankCategoryRuleModel = require('./models/bankCategoryRule.model');
 const bankWebhookEventModel = require('./models/bankWebhookEvent.model');
 
 const savingsJarRoutes = require('./routes/savingsJar.routes');
@@ -118,6 +119,7 @@ if (require.main === module) {
     await savingsJarModel.initTable();
     await jarTransactionModel.initTable();
     await bankAccountModel.initTable();
+    await bankCategoryRuleModel.initTable();
     await bankWebhookEventModel.initTable();
     console.log(`==================================================`);
   });

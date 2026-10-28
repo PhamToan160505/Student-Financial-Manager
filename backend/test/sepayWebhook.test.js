@@ -8,6 +8,7 @@ const {
   verifySePaySignature,
   normalizeSePayPayload,
   isVietinBankGateway,
+  extractCategoryCode,
   sanitizePayload
 } = require('../utils/sepayWebhook');
 
@@ -91,4 +92,12 @@ test('rejects invalid amount and removes the full account number from stored pay
   const sanitized = sanitizePayload(samplePayload);
   assert.equal(sanitized.accountNumber, '****9012');
   assert.equal(JSON.stringify(sanitized).includes('123456789012'), false);
+});
+
+test('extracts only an exact category code immediately after SEVQR', () => {
+  assert.equal(extractCategoryCode('SEVQR E'), 'E');
+  assert.equal(extractCategoryCode('thanh toan SEVQR mua1 an trua'), 'MUA1');
+  assert.equal(extractCategoryCode('SEVQR-M'), 'M');
+  assert.equal(extractCategoryCode('chuyen tien an em'), '');
+  assert.equal(extractCategoryCode('SEVQR'), '');
 });

@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
-const { maskAccountNumber, sanitizePayload } = require('../utils/sepayWebhook');
+const bankCategoryRuleModel = require('./bankCategoryRule.model');
+const { maskAccountNumber, sanitizePayload, extractCategoryCode } = require('../utils/sepayWebhook');
 
 async function initTable() {
   const query = `
@@ -70,15 +71,27 @@ async function importTransaction({ account, payload, normalized }) {
     }
 
     const type = normalized.transferType === 'out' ? 'expense' : 'income';
-    const [categoryRows] = await connection.query(
-      `SELECT id FROM categories
-       WHERE user_id IS NULL AND is_default = TRUE AND type = ?
-       ORDER BY CASE WHEN name LIKE 'Khác%' THEN 0 ELSE 1 END, id ASC
-       LIMIT 1`,
-      [type]
-    );
+    const categoryCode = extractCategoryCode(normalized.content)
+      || extractCategoryCode(normalized.description);
+    const matchedCategory = await bankCategoryRuleModel.findMatchingCategory(connection, {
+      userId: account.user_id,
+      code: categoryCode,
+      type
+    });
 
-    if (!categoryRows[0]) {
+    let category = matchedCategory;
+    if (!category) {
+      const [categoryRows] = await connection.query(
+        `SELECT id, name FROM categories
+         WHERE user_id IS NULL AND is_default = TRUE AND type = ?
+         ORDER BY CASE WHEN name LIKE 'Khác%' THEN 0 ELSE 1 END, id ASC
+         LIMIT 1`,
+        [type]
+      );
+      category = categoryRows[0] || null;
+    }
+
+    if (!category) {
       throw new Error(`Không tìm thấy danh mục mặc định cho giao dịch ${type}`);
     }
 
@@ -92,7 +105,7 @@ async function importTransaction({ account, payload, normalized }) {
        VALUES (?, ?, ?, ?, ?, ?, ?, 'sepay_vietinbank', NULL)`,
       [
         account.user_id,
-        categoryRows[0].id,
+        category.id,
         type,
         normalized.amount,
         normalized.transactionDay,

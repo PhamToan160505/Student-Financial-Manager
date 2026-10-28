@@ -15,6 +15,26 @@ function validateInput(req, res, next) {
 
 router.get('/', bankAccountController.getBankAccounts);
 
+router.get('/category-rules', bankAccountController.getCategoryRules);
+
+router.post(
+  '/category-rules',
+  body('code')
+    .trim()
+    .toUpperCase()
+    .matches(/^[A-Z0-9]{1,20}$/).withMessage('Mã danh mục chỉ gồm 1-20 chữ cái không dấu hoặc chữ số'),
+  body('categoryId').isInt({ min: 1 }).withMessage('Danh mục không hợp lệ'),
+  validateInput,
+  bankAccountController.saveCategoryRule
+);
+
+router.delete(
+  '/category-rules/:id',
+  param('id').isInt({ min: 1 }).withMessage('ID quy tắc không hợp lệ'),
+  validateInput,
+  bankAccountController.deleteCategoryRule
+);
+
 router.post(
   '/',
   body('accountNumber')

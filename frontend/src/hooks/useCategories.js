@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
  * Manages all category state: loading, error, data, and CRUD actions.
  * Pages/Components import this hook — never call categoryService directly.
  */
-export function useCategories() {
+export function useCategories(enabled = true) {
   const [categories, setCategories] = useState([]);
   const [expense, setExpense] = useState([]);
   const [income, setIncome] = useState([]);
@@ -15,6 +15,10 @@ export function useCategories() {
   const [error, setError] = useState(null);
 
   const fetchCategories = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -31,7 +35,7 @@ export function useCategories() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     fetchCategories();
